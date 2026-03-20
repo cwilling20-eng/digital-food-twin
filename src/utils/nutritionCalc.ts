@@ -91,26 +91,19 @@ export function calculateGoals(metrics: BodyMetrics): CalculatedGoals | null {
   const multiplier = ACTIVITY_MULTIPLIERS[activityLevel] || 1.2;
   const tdee = bmr * multiplier;
 
-  console.log("💪 BMR:", bmr.toFixed(0), "TDEE:", tdee.toFixed(0));
-
   const weightDifference = goalWeight !== null && currentWeight !== null ? goalWeight - currentWeight : 0;
   const wantsToLose = goalWeight !== null && currentWeight !== null && goalWeight < currentWeight;
   const wantsToGain = goalWeight !== null && currentWeight !== null && goalWeight > currentWeight;
-  const wantsToMaintain = goalWeight !== null && currentWeight !== null && goalWeight === currentWeight;
-
   const caloriesPerPound = 3500;
   const dailyCalorieChange = (Math.abs(weeklyWeightGoal) * caloriesPerPound) / 7;
 
   let calorieGoal: number;
   if (wantsToLose) {
     calorieGoal = Math.round(tdee - dailyCalorieChange);
-    console.log("🔽 Wants to LOSE: TDEE", tdee.toFixed(0), "- adjustment", dailyCalorieChange.toFixed(0), "=", calorieGoal);
   } else if (wantsToGain) {
     calorieGoal = Math.round(tdee + dailyCalorieChange);
-    console.log("🔼 Wants to GAIN: TDEE", tdee.toFixed(0), "+ adjustment", dailyCalorieChange.toFixed(0), "=", calorieGoal);
   } else {
     calorieGoal = Math.round(tdee);
-    console.log("➡️ MAINTAIN:", calorieGoal);
   }
 
   calorieGoal = Math.max(1200, calorieGoal);

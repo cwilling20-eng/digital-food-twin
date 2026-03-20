@@ -1,34 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Flame, Loader2, BarChart3 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { useApp } from '../../contexts/AppContext';
+import { useMeals } from '../../hooks/useMeals';
+import { useWaterLogs } from '../../hooks/useWaterLogs';
 import { QuickAddModal } from './QuickAddModal';
 import { WaterTracker } from './WaterTracker';
 import { MealItem } from './MealItem';
 import { MealDetailModal } from './MealDetailModal';
+import type { MealLogEntry } from '../../types';
+import { ErrorToast, useErrorToast } from '../ui/Toast';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
-
-interface MealLogEntry {
-  id: string;
-  meal_name: string;
-  meal_type: MealType | null;
-  estimated_calories: number | null;
-  protein_g: number | null;
-  carbs_g: number | null;
-  fat_g: number | null;
-  fiber_g: number | null;
-  sugar_g: number | null;
-  sodium_mg: number | null;
-  feeling: string | null;
-  created_at: string;
-}
-
-interface WaterLog {
-  id: string;
-  cups: number;
-  logged_at: string;
-}
 
 interface NutritionEstimate {
   calories: number;
@@ -86,40 +68,23 @@ function getDateRange(date: Date): { start: string; end: string } {
 export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiaryScreenProps) {
   const { nutritionGoals: goals } = useApp();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [meals, setMeals] = useState<MealLogEntry[]>([]);
-  const [waterLogs, setWaterLogs] = useState<WaterLog[]>([]);
+  const { meals, setMeals, loading: mealsLoading, fetchMealsForDate, addMeal, updateMeal: hookUpdateMeal, deleteMeal: hookDeleteMeal } = useMeals(userId);
+  const { waterLogs, fetchWaterForDate, addWater, removeWater } = useWaterLogs(userId);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addMealType, setAddMealType] = useState<MealType>('lunch');
   const [saveToast, setSaveToast] = useState(false);
+  const { errorMessage, showError, clearError } = useErrorToast();
 
   const fetchData = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
-
-    const { start, end } = getDateRange(selectedDate);
-
-    const [mealsRes, waterRes] = await Promise.all([
-      supabase
-        .from('meal_logs')
-        .select('id, meal_name, meal_type, estimated_calories, protein_g, carbs_g, fat_g, fiber_g, sugar_g, sodium_mg, feeling, created_at')
-        .eq('user_id', userId)
-        .gte('created_at', start)
-        .lte('created_at', end)
-        .order('created_at', { ascending: true }),
-      supabase
-        .from('water_logs')
-        .select('id, cups, logged_at')
-        .eq('user_id', userId)
-        .gte('logged_at', start)
-        .lte('logged_at', end)
-        .order('logged_at', { ascending: true })
+    await Promise.all([
+      fetchMealsForDate(selectedDate),
+      fetchWaterForDate(selectedDate),
     ]);
-
-    if (!mealsRes.error) setMeals(mealsRes.data || []);
-    if (!waterRes.error) setWaterLogs(waterRes.data || []);
     setLoading(false);
-  }, [userId, selectedDate]);
+  }, [userId, selectedDate, fetchMealsForDate, fetchWaterForDate]);
 
   useEffect(() => {
     fetchData();
@@ -158,27 +123,16 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
     notes: string | null;
     nutrition: NutritionEstimate | null;
   }) => {
-    const mealLogData: Record<string, unknown> = {
-      user_id: userId,
+    const result = await addMeal({
       meal_name: data.meal_name,
       meal_type: data.meal_type,
       feeling: data.feeling,
-      notes: data.notes
-    };
+      notes: data.notes,
+      nutrition: data.nutrition,
+    });
 
-    if (data.nutrition) {
-      mealLogData.estimated_calories = data.nutrition.calories;
-      mealLogData.protein_g = data.nutrition.protein_g;
-      mealLogData.carbs_g = data.nutrition.carbs_g;
-      mealLogData.fat_g = data.nutrition.fat_g;
-      mealLogData.fiber_g = data.nutrition.fiber_g;
-      mealLogData.sugar_g = data.nutrition.sugar_g;
-      mealLogData.sodium_mg = data.nutrition.sodium_mg;
-    }
-
-    const { error } = await supabase.from('meal_logs').insert(mealLogData);
-    if (error) {
-      alert(`Failed to save: ${error.message}`);
+    if (result.error) {
+      showError(`Failed to save: ${result.error}`);
       return;
     }
 
@@ -195,18 +149,13 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase
-      .from('meal_logs')
-      .delete()
-      .eq('id', deleteTarget.id)
-      .eq('user_id', userId);
+    const result = await hookDeleteMeal(deleteTarget.id);
 
-    if (error) {
-      alert(`Failed to delete: ${error.message}`);
+    if (result.error) {
+      showError(`Failed to delete: ${result.error}`);
       return;
     }
 
-    setMeals(prev => prev.filter(m => m.id !== deleteTarget.id));
     setDeleteTarget(null);
     setDetailMeal(null);
     setDeleteToast(true);
@@ -214,28 +163,13 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
   };
 
   const handleUpdateMeal = async (id: string, updates: Partial<MealLogEntry>) => {
-    const dbUpdates: Record<string, unknown> = {};
-    if (updates.meal_name !== undefined) dbUpdates.meal_name = updates.meal_name;
-    if (updates.estimated_calories !== undefined) dbUpdates.estimated_calories = updates.estimated_calories;
-    if (updates.protein_g !== undefined) dbUpdates.protein_g = updates.protein_g;
-    if (updates.carbs_g !== undefined) dbUpdates.carbs_g = updates.carbs_g;
-    if (updates.fat_g !== undefined) dbUpdates.fat_g = updates.fat_g;
-    if (updates.fiber_g !== undefined) dbUpdates.fiber_g = updates.fiber_g;
-    if (updates.sugar_g !== undefined) dbUpdates.sugar_g = updates.sugar_g;
-    if (updates.sodium_mg !== undefined) dbUpdates.sodium_mg = updates.sodium_mg;
+    const result = await hookUpdateMeal(id, updates);
 
-    const { error } = await supabase
-      .from('meal_logs')
-      .update(dbUpdates)
-      .eq('id', id)
-      .eq('user_id', userId);
-
-    if (error) {
-      alert(`Failed to update: ${error.message}`);
+    if (result.error) {
+      showError(`Failed to update: ${result.error}`);
       return;
     }
 
-    setMeals(prev => prev.map(m => m.id === id ? { ...m, ...updates } : m));
     setDetailMeal(prev => prev && prev.id === id ? { ...prev, ...updates } : prev);
     setUpdateToast(true);
     setTimeout(() => setUpdateToast(false), 2500);
@@ -355,8 +289,8 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
                       <MealItem
                         key={meal.id}
                         meal={meal}
-                        onDelete={setDeleteTarget}
-                        onTap={setDetailMeal}
+                        onDelete={(meal: MealLogEntry) => setDeleteTarget(meal)}
+                        onTap={(meal: MealLogEntry) => setDetailMeal(meal)}
                       />
                     ))}
                   </div>
@@ -374,9 +308,10 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
           })}
 
           <WaterTracker
-            userId={userId}
             waterGoal={goals.waterGoal}
             waterLogs={waterLogs}
+            onAddWater={addWater}
+            onRemoveWater={removeWater}
             onRefresh={fetchData}
           />
 
@@ -448,9 +383,13 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
         <MealDetailModal
           meal={detailMeal}
           onUpdate={handleUpdateMeal}
-          onDelete={setDeleteTarget}
+          onDelete={(meal: MealLogEntry) => setDeleteTarget(meal)}
           onClose={() => setDetailMeal(null)}
         />
+      )}
+
+      {errorMessage && (
+        <ErrorToast message={errorMessage} onDismiss={clearError} />
       )}
 
       {saveToast && (

@@ -7,12 +7,12 @@ interface MenuScannerProps {
   comprehensiveProfile: ComprehensiveUserProfile;
   scanMode: 'goal' | 'enjoyment';
   setScanMode: (mode: 'goal' | 'enjoyment') => void;
-  deviceId: string;
+  userId: string;
 }
 
-const WEBHOOK_URL = 'https://exponentmarketing.app.n8n.cloud/webhook/341c1c9e-85e0-4923-8f89-29b1a23cb839';
+import { WEBHOOK_SCANNER_URL } from '../config/api';
 
-export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, setScanMode, deviceId }: MenuScannerProps) {
+export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, setScanMode, userId }: MenuScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [cameraError, setCameraError] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -51,19 +51,6 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
     setError(null);
 
     try {
-      let finalDeviceId = deviceId;
-
-      if (!finalDeviceId) {
-        finalDeviceId = localStorage.getItem('device_id');
-      }
-
-      if (!finalDeviceId) {
-        finalDeviceId = crypto.randomUUID();
-        localStorage.setItem('device_id', finalDeviceId);
-      }
-
-      console.log('✅ Final Device ID being sent:', finalDeviceId);
-
       let capturedImage = uploadedImage;
 
       if (!capturedImage && videoRef.current && canvasRef.current) {
@@ -76,7 +63,6 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
           canvas.height = video.videoHeight;
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
           capturedImage = canvas.toDataURL('image/jpeg', 0.9);
-          console.log('Camera frame captured. Size:', capturedImage.length, 'characters');
         }
       }
 
@@ -97,15 +83,10 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
           favoriteFoods: comprehensiveProfile.favoriteFoods || []
         },
         mode: scanMode,
-        deviceId: finalDeviceId
+        userId: userId
       };
 
-      console.log('Sending request to n8n:', {
-        ...requestBody,
-        menuImage: capturedImage ? `Base64 image (${capturedImage.length} characters)` : null
-      });
-
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(WEBHOOK_SCANNER_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,8 +101,6 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
       let data;
       try {
         data = await response.json();
-        console.log('Raw API Response (fetchHistory):', data);
-        console.log('Raw API Response JSON:', JSON.stringify(data, null, 2));
       } catch {
         throw new Error('Brain is still waking up! Please try again.');
       }
@@ -130,16 +109,12 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
 
       if (Array.isArray(data) && data.length > 0 && data[0].output && typeof data[0].output === 'string' && data[0].output.trim() !== '') {
         extractedContent = data[0].output;
-        console.log('Extracted from data[0].output');
       } else if (data && typeof data === 'object' && data.output && typeof data.output === 'string' && data.output.trim() !== '') {
         extractedContent = data.output;
-        console.log('Extracted from data.output');
       } else if (Array.isArray(data) && data.length > 0 && data[0].recommendations) {
         extractedContent = data[0].recommendations;
-        console.log('Extracted from data[0].recommendations');
       } else if (data && typeof data === 'object' && data.recommendations) {
         extractedContent = data.recommendations;
-        console.log('Extracted from data.recommendations');
       }
 
       if (!extractedContent) {
@@ -182,7 +157,6 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
       reader.onload = () => {
         setUploadedImage(reader.result as string);
         setError(null);
-        console.log('Image uploaded and converted to Base64. Size:', file.size, 'bytes');
       };
       reader.readAsDataURL(file);
     }

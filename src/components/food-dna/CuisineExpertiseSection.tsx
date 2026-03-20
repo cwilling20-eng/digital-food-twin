@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, ChefHat, Check, X } from 'lucide-react';
+import { ArrowLeft, ChefHat, Check } from 'lucide-react';
 import { ChipSelector, SliderInput, TagInput, SectionCard, SaveButton } from './SharedComponents';
 import { CUISINE_CONFIGS, type CuisinePreference } from './types';
 
@@ -19,7 +19,7 @@ interface CuisineFormProps {
   saving?: boolean;
 }
 
-function CuisineForm({ cuisineId, config, data, onSave, onBack, saving }: CuisineFormProps) {
+function CuisineForm({ config, data, onSave, onBack, saving }: CuisineFormProps) {
   const [localData, setLocalData] = useState(data);
   const [saved, setSaved] = useState(false);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Heart, AlertTriangle, Utensils, Trash2, Calendar } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { useFriends } from '../../hooks/useFriends';
 import type { FriendData } from '../../types';
 
 interface FriendProfileModalProps {
@@ -28,6 +28,7 @@ export function FriendProfileModal({
   const [sharedPrefs, setSharedPrefs] = useState<string[]>([]);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { getFriendFoodDna, getUserCuisines } = useFriends(currentUserId);
 
   useEffect(() => {
     const loadFoodDna = async () => {
@@ -36,47 +37,18 @@ export function FriendProfileModal({
         return;
       }
 
-      const [cuisineRes, constraintsRes] = await Promise.all([
-        supabase
-          .from('user_cuisine_preferences')
-          .select('cuisine_type')
-          .eq('user_id', friend.friendId),
-        supabase
-          .from('user_dietary_constraints')
-          .select('allergies, restrictions')
-          .eq('user_id', friend.friendId)
-          .maybeSingle()
-      ]);
+      const dna = await getFriendFoodDna(friend.friendId);
+      setFoodDna(dna);
 
-      const favoriteCuisines = cuisineRes.data?.map(c => c.cuisine_type) || [];
-      const constraints = constraintsRes.data;
-
-      setFoodDna({
-        favoriteCuisines,
-        restrictions: constraints?.restrictions || [],
-        allergies: constraints?.allergies || []
-      });
-
-      const { data: myConstraints } = await supabase
-        .from('user_dietary_constraints')
-        .select('restrictions')
-        .eq('user_id', currentUserId)
-        .maybeSingle();
-
-      const { data: myCuisines } = await supabase
-        .from('user_cuisine_preferences')
-        .select('cuisine_type')
-        .eq('user_id', currentUserId);
-
-      const myCuisineTypes = myCuisines?.map(c => c.cuisine_type) || [];
-      const shared = favoriteCuisines.filter(c => myCuisineTypes.includes(c));
+      const myCuisineTypes = await getUserCuisines(currentUserId);
+      const shared = dna.favoriteCuisines.filter(c => myCuisineTypes.includes(c));
       setSharedPrefs(shared);
 
       setLoading(false);
     };
 
     loadFoodDna();
-  }, [friend.friendId, friend.profile.shareFoodDna, currentUserId]);
+  }, [friend.friendId, friend.profile.shareFoodDna, currentUserId, getFriendFoodDna, getUserCuisines]);
 
   const getInitials = (name: string | null) => {
     if (!name) return '?';

@@ -1,14 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Clock, RefreshCw, Loader2, AlertCircle, UtensilsCrossed } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-
-interface MealLog {
-  id: string;
-  meal_name: string;
-  feeling: string;
-  notes: string | null;
-  created_at: string;
-}
+import { useMeals } from '../hooks/useMeals';
 
 interface HistoryScreenProps {
   userId: string;
@@ -31,39 +23,13 @@ const FEELING_COLOR: Record<string, string> = {
 };
 
 export function HistoryScreen({ userId }: HistoryScreenProps) {
-  const [mealLogs, setMealLogs] = useState<MealLog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchMealLogs = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('meal_logs')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (fetchError) {
-        throw fetchError;
-      }
-
-      setMealLogs(data || []);
-    } catch (err) {
-      console.error('Error fetching meal logs:', err);
-      setError('Could not load meal history. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { meals: mealLogs, loading, fetchAllMeals } = useMeals(userId);
 
   useEffect(() => {
     if (userId) {
-      fetchMealLogs();
+      fetchAllMeals();
     }
-  }, [userId]);
+  }, [userId, fetchAllMeals]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -97,7 +63,7 @@ export function HistoryScreen({ userId }: HistoryScreenProps) {
             <p className="text-gray-500 text-sm mt-1">Your logged meals and feedback</p>
           </div>
           <button
-            onClick={fetchMealLogs}
+            onClick={fetchAllMeals}
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
             title="Refresh History"
           >
@@ -111,11 +77,6 @@ export function HistoryScreen({ userId }: HistoryScreenProps) {
           <div className="flex flex-col items-center justify-center pt-20">
             <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mb-2" />
             <p className="text-gray-400">Loading your meal history...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 p-4 rounded-xl flex items-center gap-3 text-red-700 border border-red-100">
-            <AlertCircle className="w-5 h-5" />
-            {error}
           </div>
         ) : mealLogs.length === 0 ? (
           <div className="text-center pt-20 text-gray-400">
@@ -138,16 +99,10 @@ export function HistoryScreen({ userId }: HistoryScreenProps) {
                 </span>
               </div>
 
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${FEELING_COLOR[log.feeling] || 'text-gray-600 bg-gray-50'}`}>
-                <span className="text-base">{FEELING_EMOJI[log.feeling]}</span>
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${FEELING_COLOR[log.feeling || ''] || 'text-gray-600 bg-gray-50'}`}>
+                <span className="text-base">{FEELING_EMOJI[log.feeling || '']}</span>
                 {log.feeling}
               </div>
-
-              {log.notes && (
-                <p className="mt-3 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
-                  {log.notes}
-                </p>
-              )}
             </div>
           ))
         )}

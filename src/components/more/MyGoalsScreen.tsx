@@ -34,18 +34,7 @@ export function MyGoalsScreen({ onSave, onBack }: MyGoalsScreenProps) {
   }, [goals]);
 
   useEffect(() => {
-    console.log("🔄 Recalculating! Metrics:", {
-      currentWeight: metrics.currentWeight,
-      goalWeight: metrics.goalWeight,
-      weeklyWeightGoal: metrics.weeklyWeightGoal,
-      heightFeet: metrics.heightFeet,
-      heightInches: metrics.heightInches,
-      birthDate: metrics.birthDate,
-      gender: metrics.gender,
-      activityLevel: metrics.activityLevel
-    });
     const result = calculateGoals(metrics);
-    console.log("📊 Calculation result:", result);
     setCalculated(result);
   }, [
     metrics.currentWeight,
@@ -96,7 +85,6 @@ export function MyGoalsScreen({ onSave, onBack }: MyGoalsScreenProps) {
   };
 
   const updateMetric = <K extends keyof BodyMetrics>(key: K, value: BodyMetrics[K]) => {
-    console.log(`📝 Updating ${key} to:`, value);
     setMetrics(prev => ({ ...prev, [key]: value }));
     setSaveStatus('idle');
   };

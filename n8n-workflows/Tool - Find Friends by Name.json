@@ -1,0 +1,185 @@
+{
+  "name": "Tool - Find Friends by Name",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "44074c76-7f67-4a27-9efa-6727230a6f6e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_friends",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "or",
+              "value": "=(user_id.eq.{{ $json.user_id }},friend_id.eq.{{ $json.user_id }})"
+            },
+            {
+              "name": "status",
+              "value": "eq.accepted"
+            },
+            {
+              "name": "select",
+              "value": "user_id,friend_id"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
+            },
+            {
+              "name": "authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        16,
+        0
+      ],
+      "id": "59fd6dbf-07ee-454d-9cee-6a961e72f4c8",
+      "name": "Get User's Friends"
+    },
+    {
+      "parameters": {
+        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_public_profiles",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "=in.({{ $json.friend_ids_string }})"
+            },
+            {
+              "name": "select",
+              "value": "id,username,display_name,avatar_url"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
+            },
+            {
+              "name": "authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b9ab92e7-92c9-4532-8ccd-0a418bb0a6da",
+      "name": "Get Friend Profiles"
+    },
+    {
+      "parameters": {
+        "jsCode": "const currentUserId = $('When Executed by Another Workflow').first().json.user_id;\nconst friendships = $input.all().map(item => item.json);\n\n// If friendships is an array inside first item\nconst relationships = Array.isArray(friendships[0]) ? friendships[0] : friendships;\n\n// Extract the OTHER person's ID from each friendship\nconst friendIds = relationships.map(rel => {\n  if (rel.user_id === currentUserId) {\n    return rel.friend_id;\n  } else {\n    return rel.user_id;\n  }\n}).filter(id => id); // Remove any nulls\n\nreturn [{\n  json: {\n    friend_ids: friendIds,\n    friend_ids_string: friendIds.join(',')\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "33c76143-7cb9-4865-81fd-96b455e2ef9b",
+      "name": "Extract Friend IDs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const requestedNames = $('When Executed by Another Workflow').first().json.friend_names;\nconst friendProfiles = $('HTTP Request - Get Friend Profiles').first().json || [];\n\nconst matches = [];\nconst notFound = [];\n\nfor (const name of requestedNames) {\n  const nameLower = name.toLowerCase();\n  \n  const match = friendProfiles.find(f => \n    (f.display_name && f.display_name.toLowerCase().includes(nameLower)) ||\n    (f.username && f.username.toLowerCase().includes(nameLower))\n  );\n  \n  if (match) {\n    matches.push({\n      requested_name: name,\n      user_id: match.id,\n      display_name: match.display_name,\n      username: match.username\n    });\n  } else {\n    notFound.push(name);\n  }\n}\n\nreturn [{\n  json: {\n    matched_friends: matches,\n    not_found: notFound,\n    matched_user_ids: matches.map(m => m.user_id)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "447176cc-a1ae-44d6-899e-a9ac680ff23c",
+      "name": "Match Names"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get User's Friends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User's Friends": {
+      "main": [
+        [
+          {
+            "node": "Extract Friend IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Friend Profiles": {
+      "main": [
+        [
+          {
+            "node": "Match Names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Friend IDs": {
+      "main": [
+        [
+          {
+            "node": "Get Friend Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "18e5d977-bac8-4799-a5e3-4ed63e651c8b",
+  "meta": {
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "aBnKquRFZaLH842o",
+  "tags": []
+}

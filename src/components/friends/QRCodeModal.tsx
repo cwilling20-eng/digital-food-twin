@@ -55,7 +55,7 @@ export function QRCodeModal({
   username,
   displayName,
   onClose,
-  onFriendAdded
+  onFriendAdded: _onFriendAdded
 }: QRCodeModalProps) {
   const [activeTab, setActiveTab] = useState<'share' | 'scan'>('share');
   const [copied, setCopied] = useState(false);

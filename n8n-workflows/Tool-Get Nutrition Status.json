@@ -1,0 +1,192 @@
+{
+  "name": "Tool-Get Nutrition Status",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "user_profiles",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.user_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        0
+      ],
+      "id": "895603aa-4fcf-4b4f-9b5c-53db35b262e3",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sf62mjIrqsqjFw86",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "meal_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.user_id }}"
+            },
+            {
+              "keyName": "created_at",
+              "condition": "gte",
+              "keyValue": "={{ new Date().toISOString().split('T')[0] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "78f93f02-91e0-47d6-aa3e-07d2c4aa4566",
+      "name": "Get many rows1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sf62mjIrqsqjFw86",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const profile = $('Supabase - Get User Goals').first().json;\nconst meals = $('Supabase - Get Today\\'s Meals').all().map(m => m.json);\n\n// Sum today's nutrition\nconst today = {\n  calories: 0,\n  protein_g: 0,\n  carbs_g: 0,\n  fat_g: 0,\n  fiber_g: 0,\n  sugar_g: 0,\n  sodium_mg: 0,\n  meal_count: meals.length\n};\n\nfor (const meal of meals) {\n  today.calories += meal.estimated_calories || 0;\n  today.protein_g += meal.protein_g || 0;\n  today.carbs_g += meal.carbs_g || 0;\n  today.fat_g += meal.fat_g || 0;\n  today.fiber_g += meal.fiber_g || 0;\n  today.sugar_g += meal.sugar_g || 0;\n  today.sodium_mg += meal.sodium_mg || 0;\n}\n\n// Goals with defaults\nconst goals = {\n  calorie_goal: profile.calorie_goal || 2000,\n  protein_goal: profile.protein_goal || 150,\n  carbs_goal: profile.carbs_goal || 200,\n  fat_goal: profile.fat_goal || 65\n};\n\n// Calculate remaining\nconst remaining = {\n  calories: goals.calorie_goal - today.calories,\n  protein_g: goals.protein_goal - today.protein_g,\n  carbs_g: goals.carbs_goal - today.carbs_g,\n  fat_g: goals.fat_goal - today.fat_g\n};\n\n// Body metrics\nconst body = {\n  current_weight: profile.current_weight || null,\n  goal_weight: profile.goal_weight || null,\n  starting_weight: profile.starting_weight || null\n};\n\nreturn {\n  json: {\n    goals,\n    today,\n    remaining,\n    body,\n    meals: meals.map(m => ({\n      name: m.meal_name,\n      calories: m.estimated_calories,\n      meal_type: m.meal_type,\n      time: m.created_at\n    }))\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        0
+      ],
+      "id": "75f00505-1d40-45f6-b0c4-38ceac595727",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        304,
+        0
+      ],
+      "id": "169b8ac3-9c4e-4215-88f0-ad6f9bc80ca6",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -768,
+        0
+      ],
+      "id": "6bbb2a48-2cfb-4ec1-beb9-cf734ca35755",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "console.log(\"Incoming data:\", JSON.stringify(items[0].json, null, 2));\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -512,
+        0
+      ],
+      "id": "8e6580c7-574c-46e7-9c64-fb7241e2848e",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Get many rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "09ed7b9f-d8d6-4c16-a92e-51575efe4c34",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "G9Vz8KL498V1WHII",
+  "tags": []
+}

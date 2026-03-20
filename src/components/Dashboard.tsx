@@ -5,6 +5,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useApp } from '../contexts/AppContext';
+import { useMeals } from '../hooks/useMeals';
+import { useWaterLogs } from '../hooks/useWaterLogs';
+import { useFriends } from '../hooks/useFriends';
 import type { Screen, DiningContext } from '../types';
 
 interface DashboardProps {
@@ -335,7 +338,7 @@ function RestaurantFinderSheet({
   );
 }
 
-export function Dashboard({ userId, userEmail, onNavigate, onScan, onFindRestaurant }: DashboardProps) {
+export function Dashboard({ userId, userEmail, onNavigate, onScan: _onScan, onFindRestaurant }: DashboardProps) {
   const { nutritionGoals } = useApp();
   const [nutritionData, setNutritionData] = useState<NutritionData>({ calories: 0, protein: 0, water: 0 });
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -346,91 +349,50 @@ export function Dashboard({ userId, userEmail, onNavigate, onScan, onFindRestaur
   const { greeting, icon } = getTimeBasedGreeting();
   const firstName = userEmail.split('@')[0].charAt(0).toUpperCase() + userEmail.split('@')[0].slice(1);
 
+  const { fetchTodayProgress } = useMeals(userId);
+  const { fetchTodayWater } = useWaterLogs(userId);
+  const {
+    loadFriends: hookLoadFriends,
+    handleRequest: hookHandleRequest,
+  } = useFriends(userId);
+
   const loadNutritionData = useCallback(async () => {
     if (!userId) return;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const [mealsRes, waterRes] = await Promise.all([
-      supabase
-        .from('meal_logs')
-        .select('estimated_calories, protein_g')
-        .eq('user_id', userId)
-        .gte('created_at', today.toISOString()),
-      supabase
-        .from('water_logs')
-        .select('cups')
-        .eq('user_id', userId)
-        .gte('logged_at', today.toISOString())
+    const [progress, water] = await Promise.all([
+      fetchTodayProgress(),
+      fetchTodayWater(),
     ]);
 
-    const meals = mealsRes.data || [];
-    const calories = meals.reduce((sum, m) => sum + (m.estimated_calories || 0), 0);
-    const protein = meals.reduce((sum, m) => sum + (m.protein_g || 0), 0);
-
-    const waterLogs = waterRes.data || [];
-    const water = waterLogs.reduce((sum, w) => sum + (w.cups || 0), 0);
-
-    setNutritionData({ calories, protein: Math.round(protein), water });
-  }, [userId]);
+    setNutritionData({
+      calories: progress?.calories || 0,
+      protein: Math.round(progress?.protein || 0),
+      water: water || 0,
+    });
+  }, [userId, fetchTodayProgress, fetchTodayWater]);
 
   const loadFriends = useCallback(async () => {
     if (!userId) return;
 
-    const { data } = await supabase
-      .from('user_friends')
-      .select(`
-        id,
-        friend_id,
-        user_id,
-        status
-      `)
-      .or(`user_id.eq.${userId},friend_id.eq.${userId}`);
+    const result = await hookLoadFriends();
 
-    if (!data) return;
+    const accepted: Friend[] = result.accepted.map(f => ({
+      id: f.id,
+      friendId: f.friendId,
+      displayName: f.profile.displayName || `Friend ${f.friendId.slice(0, 6)}`,
+      status: f.status,
+    }));
 
-    const friendIds = data.map(f => f.user_id === userId ? f.friend_id : f.user_id);
-
-    console.log("Loading profiles for friend IDs:", friendIds);
-    const { data: profiles, error: profileError } = await supabase
-      .from('user_public_profiles')
-      .select('id, display_name, username')
-      .in('id', friendIds);
-
-    console.log("Profile query result:", { profiles, profileError });
-
-    const profileMap = new Map<string, { display_name: string | null; username: string | null }>();
-    if (profiles) {
-      profiles.forEach(p => profileMap.set(p.id, { display_name: p.display_name, username: p.username }));
-    }
-
-    const accepted: Friend[] = [];
-    const pending: Friend[] = [];
-
-    data.forEach(f => {
-      const isSender = f.user_id === userId;
-      const friendUserId = isSender ? f.friend_id : f.user_id;
-      const profile = profileMap.get(friendUserId);
-      const displayName = profile?.display_name || profile?.username || `Friend ${friendUserId.slice(0, 6)}`;
-
-      const friendData: Friend = {
-        id: f.id,
-        friendId: friendUserId,
-        displayName,
-        status: f.status
-      };
-
-      if (f.status === 'accepted') {
-        accepted.push(friendData);
-      } else if (f.status === 'pending' && !isSender) {
-        pending.push(friendData);
-      }
-    });
+    const pending: Friend[] = result.incoming.map(f => ({
+      id: f.id,
+      friendId: f.friendId,
+      displayName: f.profile.displayName || `Friend ${f.friendId.slice(0, 6)}`,
+      status: f.status,
+    }));
 
     setFriends(accepted);
     setPendingRequests(pending);
-  }, [userId]);
+  }, [userId, hookLoadFriends]);
 
   const loadUpcomingEvents = useCallback(async () => {
     if (!userId) return;
@@ -484,14 +446,7 @@ export function Dashboard({ userId, userEmail, onNavigate, onScan, onFindRestaur
   }, [loadNutritionData, loadFriends, loadUpcomingEvents]);
 
   const handleFriendRequest = async (requestId: string, accept: boolean) => {
-    await supabase
-      .from('user_friends')
-      .update({
-        status: accept ? 'accepted' : 'declined',
-        accepted_at: accept ? new Date().toISOString() : null
-      })
-      .eq('id', requestId);
-
+    await hookHandleRequest(requestId, accept);
     loadFriends();
   };
 
@@ -533,7 +488,6 @@ export function Dashboard({ userId, userEmail, onNavigate, onScan, onFindRestaur
       }
     }
 
-    console.log("Find button clicked, navigating with:", { autoMessage, diningContext });
     onFindRestaurant(diningContext, autoMessage);
   };
 

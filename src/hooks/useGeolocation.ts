@@ -110,7 +110,6 @@ export function useGeolocation(): UseGeolocationResult {
    * Strategy 1: High accuracy (GPS) - Best for outdoor/mobile
    */
   const tryHighAccuracy = async (): Promise<GeoLocation | null> => {
-    console.log('📍 Attempting HIGH accuracy (GPS)...');
     setStatus('acquiring_gps');
 
     const position = await tryGetPosition({
@@ -121,14 +120,12 @@ export function useGeolocation(): UseGeolocationResult {
 
     if (position && position.coords.accuracy < 100) {
       const loc = toGeoLocation(position, 'gps');
-      console.log('✅ GPS lock acquired:', loc);
       return loc;
     }
 
     // GPS got a position but accuracy is poor - still return it
     if (position) {
       const loc = toGeoLocation(position, 'gps');
-      console.log('⚠️ GPS position with low accuracy:', loc);
       return loc;
     }
 
@@ -139,7 +136,6 @@ export function useGeolocation(): UseGeolocationResult {
    * Strategy 2: Low accuracy (Cell/WiFi) - Faster, works indoors
    */
   const tryLowAccuracy = async (): Promise<GeoLocation | null> => {
-    console.log('📍 Falling back to LOW accuracy (Network)...');
     setStatus('falling_back');
 
     const position = await tryGetPosition({
@@ -150,7 +146,6 @@ export function useGeolocation(): UseGeolocationResult {
 
     if (position) {
       const loc = toGeoLocation(position, 'network');
-      console.log('✅ Network location acquired:', loc);
       return loc;
     }
 
@@ -161,12 +156,9 @@ export function useGeolocation(): UseGeolocationResult {
    * Strategy 3: Cached position - Use recent location if available
    */
   const tryCachedPosition = async (): Promise<GeoLocation | null> => {
-    console.log('📍 Attempting to use CACHED position...');
-
     // Check our internal cache first (from previous successful request)
     const cacheAge = Date.now() - lastSuccessTimeRef.current;
     if (cachedLocationRef.current && cacheAge < 300000) { // 5 minutes
-      console.log('✅ Using internally cached location:', cachedLocationRef.current);
       return { ...cachedLocationRef.current, source: 'cached' };
     }
 
@@ -179,7 +171,6 @@ export function useGeolocation(): UseGeolocationResult {
 
     if (position) {
       const loc = toGeoLocation(position, 'cached');
-      console.log('✅ Browser cached location:', loc);
       return loc;
     }
 
@@ -191,8 +182,6 @@ export function useGeolocation(): UseGeolocationResult {
    * Only use this as absolute last resort - accuracy is city-level
    */
   const tryIpFallback = async (): Promise<GeoLocation | null> => {
-    console.log('📍 Attempting IP-based geolocation fallback...');
-
     try {
       // Using ipapi.co - free tier, no API key needed
       const response = await fetch('https://ipapi.co/json/', {
@@ -212,7 +201,6 @@ export function useGeolocation(): UseGeolocationResult {
           accuracy: 10000, // ~10km accuracy for IP geolocation
           source: 'ip_fallback'
         };
-        console.log('✅ IP-based location:', loc, `(${data.city}, ${data.region})`);
         return loc;
       }
     } catch (err) {

@@ -1,0 +1,221 @@
+{
+  "name": "Tool - Get Group Food DNA",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "490bebad-e0b2-48c1-945b-e26cfc8807d4",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const userIds = $('When Executed by Another Workflow').first().json.user_ids;\nconst profiles = $('HTTP Request - Get Profiles').first().json || [];\nconst publicProfiles = $('HTTP Request - Get Public Profiles').first().json || [];\nconst constraints = $('HTTP Request - Get Dietary Constraints').first().json || [];\nconst cuisinePrefs = $('HTTP Request - Get Cuisine Preferences').first().json || [];\n\n// Build a profile for each user\nconst groupMembers = userIds.map(userId => {\n  const profile = profiles.find(p => p.id === userId) || {};\n  const publicProfile = publicProfiles.find(p => p.id === userId) || {};\n  const userConstraints = constraints.find(c => c.user_id === userId) || {};\n  const userCuisines = cuisinePrefs.filter(c => c.user_id === userId) || [];\n  \n  return {\n    user_id: userId,\n    name: publicProfile.display_name || publicProfile.username || 'Friend',\n    \n    // Dietary constraints (HARD requirements)\n    allergies: userConstraints.allergies || [],\n    restrictions: userConstraints.restrictions || [],\n    never_eat: userConstraints.never_eat || [],\n    \n    // Preferences (SOFT - try to match)\n    favorite_foods: profile.favorite_foods || [],\n    dislikes: profile.dislikes || [],\n    \n    // Cuisine preferences\n    favorite_cuisines: userCuisines.map(c => c.cuisine_type),\n    cuisine_details: userCuisines.map(c => ({\n      cuisine: c.cuisine_type,\n      favorite_dishes: c.favorite_dishes || [],\n      spice_level: c.spice_level || 5\n    })),\n    \n    // Taste profile\n    spicy_tolerance: profile.spicy_preference || 5\n  };\n});\n\n// Compile group constraints\nconst allAllergies = [...new Set(groupMembers.flatMap(m => m.allergies))];\nconst allRestrictions = [...new Set(groupMembers.flatMap(m => m.restrictions))];\nconst allNeverEat = [...new Set(groupMembers.flatMap(m => m.never_eat))];\nconst allDislikes = [...new Set(groupMembers.flatMap(m => m.dislikes))];\n\n// Find common favorite cuisines\nconst cuisineCounts = {};\ngroupMembers.forEach(m => {\n  m.favorite_cuisines.forEach(c => {\n    cuisineCounts[c] = (cuisineCounts[c] || 0) + 1;\n  });\n});\n\nconst sharedCuisines = Object.entries(cuisineCounts)\n  .filter(([cuisine, count]) => count >= Math.ceil(groupMembers.length / 2))\n  .map(([cuisine]) => cuisine)\n  .sort((a, b) => cuisineCounts[b] - cuisineCounts[a]);\n\n// Find lowest spice tolerance in group\nconst lowestSpiceTolerance = Math.min(...groupMembers.map(m => m.spicy_tolerance));\n\nreturn [{\n  json: {\n    group_size: groupMembers.length,\n    members: groupMembers,\n    \n    // HARD constraints - must respect these\n    hard_constraints: {\n      all_allergies: allAllergies,\n      all_restrictions: allRestrictions,\n      all_never_eat: allNeverEat,\n      description: allAllergies.length > 0 || allRestrictions.length > 0 \n        ? `Must avoid: ${[...allAllergies, ...allRestrictions].join(', ')}`\n        : 'No hard dietary restrictions'\n    },\n    \n    // SOFT preferences - try to accommodate\n    soft_preferences: {\n      shared_favorite_cuisines: sharedCuisines,\n      combined_dislikes: allDislikes,\n      max_spice_level: lowestSpiceTolerance\n    },\n    \n    // Recommendation summary\n    recommendation_notes: generateRecommendationNotes(groupMembers, sharedCuisines, allAllergies)\n  }\n}];\n\nfunction generateRecommendationNotes(members, sharedCuisines, allergies) {\n  const notes = [];\n  \n  if (allergies.length > 0) {\n    notes.push(`⚠️ Allergy alert: ${allergies.join(', ')} - must avoid these`);\n  }\n  \n  if (sharedCuisines.length > 0) {\n    notes.push(`✅ Cuisines everyone enjoys: ${sharedCuisines.slice(0, 3).join(', ')}`);\n  } else {\n    notes.push(`ℹ️ No shared cuisine favorites - look for versatile restaurants`);\n  }\n  \n  const spiceLevels = members.map(m => m.spicy_tolerance);\n  if (Math.max(...spiceLevels) - Math.min(...spiceLevels) > 4) {\n    notes.push(`🌶️ Mixed spice preferences - choose a place with mild and spicy options`);\n  }\n  \n  return notes;\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "b607de66-09a9-4388-9824-37aaba2fcbb4",
+      "name": "Compile Group DNA1"
+    },
+    {
+      "parameters": {
+        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_cuisine_preferences",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "user_id",
+              "value": "=in.({{ $('When Executed by Another Workflow').item.json.user_ids.join(',') }})"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "cb514f99-f7d1-4186-b8d8-54c7f0da1e30",
+      "name": "Get Cuisine Preferences"
+    },
+    {
+      "parameters": {
+        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_dietary_constraints",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "user_id",
+              "value": "=in.({{ $('When Executed by Another Workflow').item.json.user_ids.join(',') }})"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "80fd62ae-59b6-419d-b440-a7812965cf37",
+      "name": "Get Dietary Constraints"
+    },
+    {
+      "parameters": {
+        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_public_profiles",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "=in.({{ $json.user_ids.join(',') }})"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "c138e78f-1817-4314-95a1-9692e928de9c",
+      "name": "Get Public Profiles"
+    },
+    {
+      "parameters": {
+        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_profiles",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "=in.({{ $json.user_ids.join(',') }})"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4d59e165-5659-41a6-ba4c-3eba07047828",
+      "name": "Get Profiles"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cuisine Preferences": {
+      "main": [
+        [
+          {
+            "node": "Compile Group DNA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Dietary Constraints": {
+      "main": [
+        [
+          {
+            "node": "Get Cuisine Preferences",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Public Profiles": {
+      "main": [
+        [
+          {
+            "node": "Get Dietary Constraints",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Profiles": {
+      "main": [
+        [
+          {
+            "node": "Get Public Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "af3552d9-61ca-4a91-8d91-a32c23f89321",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "covntvo2jufHt1CU",
+  "tags": []
+}

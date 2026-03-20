@@ -1,0 +1,125 @@
+{
+  "name": "Tool-Estimate Nutrition",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "meal_name"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "71334c72-c0e9-46e0-9b1c-9a1ad100aab0",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Estimate the nutritional content for this meal: \"{{ $json.meal_name }}\"\n\nReturn ONLY a JSON object with these fields (use reasonable estimates based on typical serving sizes):\n{\n  \"calories\": <number>,\n  \"protein_g\": <number>,\n  \"carbs_g\": <number>,\n  \"fat_g\": <number>,\n  \"fiber_g\": <number>,\n  \"sugar_g\": <number>,\n  \"sodium_mg\": <number>,\n  \"confidence\": \"low\" | \"medium\" | \"high\",\n  \"notes\": \"<brief note about assumptions>\"\n}\n\nBe realistic. A \"Spicy Thai Basil Chicken\" from a restaurant is roughly 650-800 calories. A \"Side Salad\" is 50-150 calories.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c6e11cc5-c4ce-4660-b455-29bd24e5a758",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        208
+      ],
+      "id": "d7940f61-af77-49a5-b0f9-170f940ad6af",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Bp7VfJdApnukThJH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = items[0].json;\nconst response = input.output || '';\n\nlet nutrition = {\n  calories: 0,\n  protein_g: 0,\n  carbs_g: 0,\n  fat_g: 0,\n  fiber_g: 0,\n  sugar_g: 0,\n  sodium_mg: 0,\n  confidence: 'low',\n  notes: 'Could not estimate'\n};\n\ntry {\n  // Remove markdown code blocks if present\n  let cleaned = response\n    .replace(/```json\\n?/g, '')\n    .replace(/```\\n?/g, '')\n    .trim();\n  \n  // Parse the JSON\n  nutrition = JSON.parse(cleaned);\n} catch (e) {\n  console.log('Parse error:', e.message);\n  nutrition.notes = 'Parse error: ' + e.message;\n}\n\nreturn { json: nutrition };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "fda8c527-889c-4aa9-afc3-07b1a06e5a61",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5d14d8ba-50bf-4806-981a-13e62046fc3f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "dBIAUeIq2OIxtnuf",
+  "tags": []
+}

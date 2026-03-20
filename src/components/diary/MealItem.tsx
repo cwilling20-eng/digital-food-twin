@@ -1,20 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { Trash2 } from 'lucide-react';
-
-interface MealLogEntry {
-  id: string;
-  meal_name: string;
-  meal_type: string | null;
-  estimated_calories: number | null;
-  protein_g: number | null;
-  carbs_g: number | null;
-  fat_g: number | null;
-  fiber_g: number | null;
-  sugar_g: number | null;
-  sodium_mg: number | null;
-  feeling: string | null;
-  created_at: string;
-}
+import type { MealLogEntry } from '../../types';
 
 interface MealItemProps {
   meal: MealLogEntry;

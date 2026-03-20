@@ -1,0 +1,175 @@
+{
+  "name": "Tool-Get Daily Nutrition",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "device_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "97474d18-18c2-4f89-9a5e-b066a20d5fb1",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "meal_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "device_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.device_id }}"
+            },
+            {
+              "keyName": "created_at",
+              "condition": "gt",
+              "keyValue": "={{ DateTime.now().startOf('day').toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "10163f7b-2a6e-4891-95ea-30878a0715e6",
+      "name": "Get many rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "sf62mjIrqsqjFw86",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const meals = items.map(i => i.json);\n\n// Handle empty results - Supabase returns [{}] when no rows found\nif (!meals || meals.length === 0 || !meals[0] || !meals[0].id) {\n  return [{\n    json: {\n      total_calories: 0,\n      total_protein_g: 0,\n      total_carbs_g: 0,\n      total_fat_g: 0,\n      total_fiber_g: 0,\n      total_sugar_g: 0,\n      total_sodium_mg: 0,\n      meal_count: 0,\n      meals: [],\n      message: \"No meals logged today yet\"\n    }\n  }];\n}\n\nconst totals = {\n  total_calories: 0,\n  total_protein_g: 0,\n  total_carbs_g: 0,\n  total_fat_g: 0,\n  total_fiber_g: 0,\n  total_sugar_g: 0,\n  total_sodium_mg: 0,\n  meal_count: meals.length,\n  meals: []\n};\n\nfor (const meal of meals) {\n  totals.total_calories += meal.estimated_calories || 0;\n  totals.total_protein_g += meal.protein_g || 0;\n  totals.total_carbs_g += meal.carbs_g || 0;\n  totals.total_fat_g += meal.fat_g || 0;\n  totals.total_fiber_g += meal.fiber_g || 0;\n  totals.total_sugar_g += meal.sugar_g || 0;\n  totals.total_sodium_mg += meal.sodium_mg || 0;\n  \n  totals.meals.push({\n    name: meal.meal_name,\n    calories: meal.estimated_calories || 0,\n    protein_g: meal.protein_g || 0,\n    carbs_g: meal.carbs_g || 0,\n    fat_g: meal.fat_g || 0,\n    time: meal.created_at,\n    feeling: meal.feeling,\n    meal_type: meal.meal_type\n  });\n}\n\nreturn [{ json: totals }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -64
+      ],
+      "id": "2b9f6ed4-0085-4980-a561-bf05a380ee58",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f8a0a543-ebd4-4785-b0ff-80280a4fd8d4",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a3b1c314-a058-4c71-8c8d-68c02d166276",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    total_calories: 0,\n    total_protein_g: 0,\n    total_carbs_g: 0,\n    total_fat_g: 0,\n    total_fiber_g: 0,\n    total_sugar_g: 0,\n    total_sodium_mg: 0,\n    meal_count: 0,\n    meals: [],\n    message: \"No meals logged today yet\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        80
+      ],
+      "id": "cfd3c7c9-c9e7-4c91-a368-999fd6217cb8",
+      "name": "Code in JavaScript2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6aef6f8a-57a4-450f-9780-bcc07ccaecd4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "ZecyT6CoFo883i3c",
+  "tags": []
+}

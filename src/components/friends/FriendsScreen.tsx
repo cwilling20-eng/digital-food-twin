@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  ArrowLeft, Search, QrCode, UserPlus, Check, X, Users,
-  ChevronRight, Share2, Camera, Copy, Heart, AlertTriangle
+  ArrowLeft, Search, QrCode, Check, X, Users,
+  ChevronRight, Share2, Camera
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { useFriends } from '../../hooks/useFriends';
+import { usePublicProfile } from '../../hooks/usePublicProfile';
 import type { Screen, PublicProfile, FriendData } from '../../types';
 import { FriendProfileModal } from './FriendProfileModal';
 import { QRCodeModal } from './QRCodeModal';
@@ -28,97 +29,21 @@ export function FriendsScreen({ userId, onNavigate, onPlanDinner }: FriendsScree
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const [friends, setFriends] = useState<FriendData[]>([]);
-  const [incomingRequests, setIncomingRequests] = useState<FriendData[]>([]);
-  const [outgoingRequests, setOutgoingRequests] = useState<FriendData[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<FriendData | null>(null);
   const [showQR, setShowQR] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  const [userProfile, setUserProfile] = useState<PublicProfile | null>(null);
   const [activeTab, setActiveTab] = useState<'search' | 'qr'>('search');
-  const [loading, setLoading] = useState(true);
 
-  const loadUserProfile = useCallback(async () => {
-    const { data } = await supabase
-      .from('user_public_profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+  const {
+    friends, incomingRequests, outgoingRequests, loading,
+    loadFriends,
+    searchUsers: hookSearchUsers,
+    sendFriendRequest: hookSendRequest,
+    handleRequest: hookHandleRequest,
+    removeFriend: hookRemoveFriend,
+  } = useFriends(userId);
 
-    if (data) {
-      setUserProfile({
-        id: data.id,
-        username: data.username,
-        displayName: data.display_name,
-        avatarUrl: data.avatar_url,
-        shareFoodDna: data.share_food_dna
-      });
-    }
-  }, [userId]);
-
-  const loadFriends = useCallback(async () => {
-    setLoading(true);
-
-    const { data: friendsData } = await supabase
-      .from('user_friends')
-      .select('*')
-      .or(`user_id.eq.${userId},friend_id.eq.${userId}`);
-
-    if (!friendsData) {
-      setLoading(false);
-      return;
-    }
-
-    const friendIds = friendsData.map(f => f.user_id === userId ? f.friend_id : f.user_id);
-
-    const { data: profiles } = await supabase
-      .from('user_public_profiles')
-      .select('*')
-      .in('id', friendIds);
-
-    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
-
-    const accepted: FriendData[] = [];
-    const incoming: FriendData[] = [];
-    const outgoing: FriendData[] = [];
-
-    friendsData.forEach(f => {
-      const isSender = f.user_id === userId;
-      const friendUserId = isSender ? f.friend_id : f.user_id;
-      const profile = profileMap.get(friendUserId);
-
-      const friendData: FriendData = {
-        id: f.id,
-        friendId: friendUserId,
-        userId: f.user_id,
-        status: f.status,
-        profile: {
-          id: friendUserId,
-          username: profile?.username || null,
-          displayName: profile?.display_name || `User ${friendUserId.slice(0, 6)}`,
-          avatarUrl: profile?.avatar_url || null,
-          shareFoodDna: profile?.share_food_dna || false
-        },
-        requestedAt: f.requested_at,
-        acceptedAt: f.accepted_at
-      };
-
-      if (f.status === 'accepted') {
-        accepted.push(friendData);
-      } else if (f.status === 'pending') {
-        if (isSender) {
-          outgoing.push(friendData);
-        } else {
-          incoming.push(friendData);
-        }
-      }
-    });
-
-    setFriends(accepted);
-    setIncomingRequests(incoming);
-    setOutgoingRequests(outgoing);
-    setLoading(false);
-  }, [userId]);
+  const { publicProfile: userProfile, loadProfile: loadUserProfile } = usePublicProfile(userId);
 
   useEffect(() => {
     loadUserProfile();
@@ -133,32 +58,16 @@ export function FriendsScreen({ userId, onNavigate, onPlanDinner }: FriendsScree
 
     setSearching(true);
 
-    const { data } = await supabase
-      .from('user_public_profiles')
-      .select('id, username, display_name, avatar_url')
-      .or(`username.ilike.%${query}%,display_name.ilike.%${query}%`)
-      .neq('id', userId)
-      .limit(10);
+    const friendSet = new Set(friends.map(f => f.friendId));
+    const pendingSet = new Set([
+      ...outgoingRequests.map(r => r.friendId),
+      ...incomingRequests.map(r => r.friendId)
+    ]);
 
-    if (data) {
-      const friendSet = new Set(friends.map(f => f.friendId));
-      const pendingSet = new Set([
-        ...outgoingRequests.map(r => r.friendId),
-        ...incomingRequests.map(r => r.friendId)
-      ]);
-
-      setSearchResults(data.map(u => ({
-        id: u.id,
-        username: u.username || '',
-        display_name: u.display_name || `User ${u.id.slice(0, 6)}`,
-        avatar_url: u.avatar_url,
-        alreadyFriend: friendSet.has(u.id),
-        pendingRequest: pendingSet.has(u.id)
-      })));
-    }
-
+    const results = await hookSearchUsers(query, friendSet, pendingSet);
+    setSearchResults(results);
     setSearching(false);
-  }, [userId, friends, outgoingRequests, incomingRequests]);
+  }, [friends, outgoingRequests, incomingRequests, hookSearchUsers]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -173,37 +82,19 @@ export function FriendsScreen({ userId, onNavigate, onPlanDinner }: FriendsScree
       return;
     }
 
-    await supabase
-      .from('user_friends')
-      .insert({
-        user_id: userId,
-        friend_id: friendId,
-        status: 'pending'
-      });
-
+    await hookSendRequest(friendId);
     loadFriends();
     setSearchQuery('');
     setSearchResults([]);
   };
 
   const handleRequest = async (requestId: string, accept: boolean) => {
-    await supabase
-      .from('user_friends')
-      .update({
-        status: accept ? 'accepted' : 'declined',
-        accepted_at: accept ? new Date().toISOString() : null
-      })
-      .eq('id', requestId);
-
+    await hookHandleRequest(requestId, accept);
     loadFriends();
   };
 
-  const removeFriend = async (friendId: string, recordId: string) => {
-    await supabase
-      .from('user_friends')
-      .delete()
-      .eq('id', recordId);
-
+  const removeFriend = async (_friendId: string, recordId: string) => {
+    await hookRemoveFriend(recordId);
     setSelectedFriend(null);
     loadFriends();
   };

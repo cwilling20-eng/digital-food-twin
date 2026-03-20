@@ -1,21 +1,16 @@
 import { useState } from 'react';
 import { Droplets, Plus, Minus, X } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-
-interface WaterLog {
-  id: string;
-  cups: number;
-  logged_at: string;
-}
+import type { WaterLog } from '../../hooks/useWaterLogs';
 
 interface WaterTrackerProps {
-  userId: string;
   waterGoal: number;
   waterLogs: WaterLog[];
+  onAddWater: (cups: number) => Promise<{ error?: string }>;
+  onRemoveWater: (logId: string) => Promise<{ error?: string }>;
   onRefresh: () => void;
 }
 
-export function WaterTracker({ userId, waterGoal, waterLogs, onRefresh }: WaterTrackerProps) {
+export function WaterTracker({ waterGoal, waterLogs, onAddWater, onRemoveWater, onRefresh }: WaterTrackerProps) {
   const [showCustom, setShowCustom] = useState(false);
   const [customCups, setCustomCups] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -26,11 +21,8 @@ export function WaterTracker({ userId, waterGoal, waterLogs, onRefresh }: WaterT
 
   const addWater = async (cups: number) => {
     setSaving(true);
-    const { error } = await supabase.from('water_logs').insert({
-      user_id: userId,
-      cups,
-    });
-    if (!error) onRefresh();
+    const result = await onAddWater(cups);
+    if (!result.error) onRefresh();
     setSaving(false);
     setShowCustom(false);
   };
@@ -38,8 +30,8 @@ export function WaterTracker({ userId, waterGoal, waterLogs, onRefresh }: WaterT
   const removeLastLog = async () => {
     if (waterLogs.length === 0) return;
     const lastLog = waterLogs[waterLogs.length - 1];
-    const { error } = await supabase.from('water_logs').delete().eq('id', lastLog.id);
-    if (!error) onRefresh();
+    const result = await onRemoveWater(lastLog.id);
+    if (!result.error) onRefresh();
   };
 
   return (

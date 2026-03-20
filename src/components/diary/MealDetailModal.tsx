@@ -1,22 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { X, Trash2, Loader2, Pencil, Check } from 'lucide-react';
-
-const N8N_NUTRITION_URL = 'https://exponentmarketing.app.n8n.cloud/webhook/estimate-nutrition';
-
-interface MealLogEntry {
-  id: string;
-  meal_name: string;
-  meal_type: string | null;
-  estimated_calories: number | null;
-  protein_g: number | null;
-  carbs_g: number | null;
-  fat_g: number | null;
-  fiber_g: number | null;
-  sugar_g: number | null;
-  sodium_mg: number | null;
-  feeling: string | null;
-  created_at: string;
-}
+import { WEBHOOK_NUTRITION_URL } from '../../config/api';
+import type { MealLogEntry } from '../../types';
 
 interface MealDetailModalProps {
   meal: MealLogEntry;
@@ -51,7 +36,7 @@ export function MealDetailModal({ meal, onUpdate, onDelete, onClose }: MealDetai
 
   const estimateNutrition = useCallback(async (name: string): Promise<NutritionEstimate | null> => {
     try {
-      const response = await fetch(N8N_NUTRITION_URL, {
+      const response = await fetch(WEBHOOK_NUTRITION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ meal_description: name })

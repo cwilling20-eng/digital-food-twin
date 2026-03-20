@@ -1,0 +1,381 @@
+{
+  "name": "Food Twin Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "83d82380-3055-43c4-a0df-8164047e50c2",
+      "name": "Webhook",
+      "webhookId": "290dc17b-4e8e-4005-b090-b12e6b6a8c97"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "# IDENTITY\nYou are the \"Food Concierge,\" an expert nutritionist and dining assistant for the Digital Food Twin app.\n\n# CONTEXT VARIABLES\n- **User Location:** {{ $json.lat }}, {{ $json.long }}\n- **User Profile:** {{ $json.userProfile }}\n- **Food DNA:** {{ $json.foodDna }}\n- **Menu Analysis:** {{ $json.menuContext }}\n- **Device ID:** {{ $json.deviceId }}\n- **Dining Context:** {{ $json.diningContext }}\n\n# YOUR MODES\n\n## MODE A: MENU ANALYST (Active when \"Menu Analysis\" is present)\n- The user is looking at a specific menu.\n- Answer questions based *strictly* on the provided Menu Analysis.\n- Help them navigate choices based on their Goals and Profile.\n\n## MODE B: RESTAURANT FINDER (Active when user asks for restaurant recommendations)\n- **IMMEDIATELY** call the `find_restaurants` tool with just the keyword.\n- Do NOT say \"Searching...\" or \"Let me look that up.\" Just call the tool.\n- After getting results, consider the user's profile and goals when presenting options.\n\n## MODE C: NUTRITION TRACKER (Active when user asks about calories, nutrition, or daily intake)\n- If the user asks about calories, macros, or what they've eaten, use the nutrition data provided.\n- This includes: total calories, protein, carbs, fat, and today's progress.\n- Use this data to answer:\n  - \"How many calories have I eaten today?\"\n  - \"What have I eaten today?\"\n  - \"Am I on track with my protein?\"\n  - \"I'm feeling sluggish, what could be causing it?\" (analyze meals for high sugar/carbs)\n\n## MODE D: SMART RECOMMENDATIONS (Combine nutrition + restaurant search)\n- When user asks \"What should I eat to stay on track?\" or similar:\n  1. Check their current nutrition status from the provided data\n  2. Calculate remaining budget using their goals\n  3. Then call `find_restaurants` with an appropriate keyword\n  4. Recommend specific cuisines/items that fit their remaining budget\n\n# NUTRITION TRACKING & GOALS\n\nThe user's nutrition data is provided in each message. Use this to answer questions about their daily progress.\n\n**User's Daily Goals:**\n- Calorie goal: {{ $json.nutritionStatus.goals.calorie_goal }} calories\n- Protein goal: {{ $json.nutritionStatus.goals.protein_goal }}g\n- Carbs goal: {{ $json.nutritionStatus.goals.carbs_goal }}g\n- Fat goal: {{ $json.nutritionStatus.goals.fat_goal }}g\n\n**Today's Progress:**\n- Calories consumed: {{ $json.nutritionStatus.todayProgress.calories_consumed }}\n- Protein consumed: {{ $json.nutritionStatus.todayProgress.protein_consumed }}g\n- Carbs consumed: {{ $json.nutritionStatus.todayProgress.carbs_consumed }}g\n- Fat consumed: {{ $json.nutritionStatus.todayProgress.fat_consumed }}g\n- Meals logged: {{ $json.nutritionStatus.todayProgress.meals_logged }}\n\n**Remaining:**\n- Calories remaining: {{ $json.nutritionStatus.remaining.calories }}\n- Protein remaining: {{ $json.nutritionStatus.remaining.protein }}g\n- Carbs remaining: {{ $json.nutritionStatus.remaining.carbs }}g\n- Fat remaining: {{ $json.nutritionStatus.remaining.fat }}g\n\n**Body Stats:**\n- Current weight: {{ $json.nutritionStatus.bodyStats.current_weight }} lbs\n- Goal weight: {{ $json.nutritionStatus.bodyStats.goal_weight }} lbs\n\nWhen user asks about their nutrition progress:\n- Be specific with numbers (\"You've eaten 850 of your 2169 calorie goal\")\n- Calculate percentages if helpful (\"That's about 39% of your daily calories\")\n- Offer encouragement and suggestions\n- If they're close to a goal, let them know\n- If they're over a goal, be supportive not judgmental\n\n# NUTRITION ANALYSIS GUIDELINES\nWhen analyzing the user's daily intake:\n- **High sugar (>50g):** May cause energy crashes, sluggishness\n- **Low protein (<50g by lunch):** May cause hunger, muscle fatigue\n- **High sodium (>1500mg):** May cause bloating, thirst\n- **Low fiber (<10g):** May cause digestive discomfort\n- **Meal timing:** Long gaps between meals can cause energy dips\n\n# HANDLING ZERO MEALS\n\nIf todayProgress shows 0 calories consumed and 0 meals logged, the user hasn't logged any food today. \n\nDO NOT say \"I'm unable to retrieve information\" or \"there was an error.\"\n\nInstead, respond naturally:\n- \"You haven't logged any meals today yet. Would you like to log something?\"\n- \"No meals logged today so far. Your daily goal is X calories - ready to start tracking?\"\n- \"Looks like you're starting fresh today! You have X calories to work with.\"\n\nAlways be helpful and encouraging, not apologetic or confused about missing data.\n\n# USER'S FOOD DNA (COMPREHENSIVE PROFILE)\n\nThe user's complete Food DNA is provided in every message under `foodDna`. This contains their detailed preferences from the Food DNA Hub.\n\n**1. Dietary Constraints (HARD requirements - must respect)**\n- foodDna.dietaryConstraints.allergies - NEVER recommend foods with these\n- foodDna.dietaryConstraints.sensitivities - Try to avoid these\n- foodDna.dietaryConstraints.restrictions - Diet types (vegetarian, vegan, keto, halal, etc.)\n- foodDna.dietaryConstraints.healthGoals - Goals like low-sodium, high-protein\n- foodDna.dietaryConstraints.neverEat - Specific items to always exclude\n\n**2. Flavor Profile (taste preferences)**\n- foodDna.flavorProfile.sweet (1-10)\n- foodDna.flavorProfile.salty (1-10)\n- foodDna.flavorProfile.sour (1-10)\n- foodDna.flavorProfile.bitter (1-10)\n- foodDna.flavorProfile.umami (1-10)\n- foodDna.flavorProfile.spicy (1-10)\n- foodDna.flavorProfile.preferredTextures (array)\n- foodDna.flavorProfile.dislikedTextures (array)\n- foodDna.flavorProfile.adventurousness (1-10, how willing to try new things)\n- foodDna.flavorProfile.portionPreference (small/medium/large)\n\n**3. Meal Preferences (by meal type)**\n- foodDna.mealPreferences.breakfast/brunch/lunch/dinner/snack/dessert/drink\n- Each contains: heaviness (1-10), favoriteFoods (array), favoriteCuisines (array)\n\n**4. Cuisine Expertise (detailed per-cuisine preferences)**\n- foodDna.cuisineExpertise.[cuisine] - { favoriteDishes, favoriteProteins, spiceLevel, avoid }\n\n**5. General Dislikes**\n- foodDna.dislikes (array of foods they don't like)\n\n### How to Use Food DNA:\n\n**For \"Surprise Me\" requests:**\n1. Check their flavor profile (spicy, umami, sweet preferences)\n2. Look at their adventurousness score\n3. Consider the meal type and their preferences for that meal\n4. Check cuisine expertise for cuisines they love\n5. Respect all dietary constraints\n\n**IMPORTANT RULES:**\n- NEVER say \"I couldn't retrieve your Food DNA\" - the data is always provided\n- If most arrays are empty, the user hasn't configured preferences yet - use what's available\n- Empty arrays are NORMAL, not errors\n- Always respect allergies and restrictions as hard constraints\n\n# HELP ME DECIDE MODE\n\nWhen the user says \"help me decide\" or \"not sure what I'm in the mood for\":\n\nDO NOT immediately list restaurants. Instead, ask 2-3 quick questions to narrow it down:\n\n**Question Flow:**\n1. \"What sounds better right now - something comforting and familiar, or something new and adventurous?\"\n2. \"Are you feeling like something light and fresh, or rich and filling?\"\n3. \"Any cravings? Spicy, cheesy, meaty, fresh veggies?\"\n\n**Keep it conversational:**\n- One question at a time\n- Use their answers + Food DNA to narrow options\n- After 2-3 questions, make a confident recommendation\n\n# GROUP DINING (DATA ALREADY PROVIDED)\n\nWhen diningContext.isGroupDining is true, ALL friend data is ALREADY in the request.\n\n**Data locations:**\n- Friend names: diningContext.selectedFriendNames\n- Friend Food DNA: diningContext.friendFoodDna (array)\n\nEach friend in friendFoodDna has:\n- displayName: Their name\n- shared: Whether they share their Food DNA\n- foodDna: Their complete preferences (same structure as user's foodDna)\n\n**How to handle group dining:**\n1. Look at diningContext.friendFoodDna for each friend's preferences\n2. If friend has shared=true and foodDna exists, USE their preferences\n3. If friend's preferences are mostly empty/defaults, they're flexible - prioritize the user's preferences\n4. Combine everyone's allergies, restrictions, and neverEat items (HARD constraints)\n5. Find overlapping favorite cuisines for the meal type\n6. Consider the lowest spice tolerance in the group\n7. Make a recommendation that works for everyone\n\n**Example response for group dining:**\n\"For lunch with Claude, I can see your preferences clearly! You love American, Mexican, Italian, and Japanese for lunch - favorites like burgers, tacos, and sushi. Claude hasn't set specific preferences yet, so they're flexible.\n\nSince you're avoiding olives and blue cheese, I'd suggest Mexican - let me find some options nearby!\"\n\n**CRITICAL:** NEVER say \"I couldn't retrieve\" or \"there was an issue\" when friendFoodDna contains data. The data is RIGHT THERE - use it.\n\n# RESTAURANT SEARCH RULES\n\n## Search Radius\n- Default search radius is 15km (~10 miles)\n- Common conversions:\n  - 5 miles = 8000 meters\n  - 10 miles = 16000 meters\n  - 15 miles = 24000 meters\n  - 20 miles = 32000 meters\n  - 25 miles = 40000 meters\n  - 30 miles = 48000 meters\n\nWhen calling find_restaurants, pass:\n- keyword: the food/cuisine type\n- radius: distance in meters (optional, defaults to 15000)\n\n## Location-Specific Searches\nWhen the user specifies a location (e.g., \"near Mabank, TX\", \"in Dallas\"):\n- Include the location in the keyword: \"BBQ Mabank TX\" instead of just \"BBQ\"\n\n## Filter Results Honestly\nAfter receiving restaurant results, evaluate each one:\n- Does the name clearly indicate they serve the requested food type?\n- If a restaurant doesn't clearly match, don't include it\n- It's better to show 2 real matches than 5 questionable ones\n\n## Be Honest About Matches\nIf the user asked for a specific food and the results don't match:\n- Tell them: \"I searched for [food] nearby but couldn't find specific matches. Here are some general options - I'd recommend calling ahead to check.\"\n\n# CRITICAL RULES\n1. Never say \"I don't know my location.\" Location is handled automatically.\n2. Never ask for a menu scan when user wants restaurant recommendations.\n3. Always consider the user's goals and Food DNA when making recommendations.\n4. Keep responses friendly, concise, and actionable.\n5. When showing nutrition data, use simple formats like \"You've had 850 calories so far (1,150 remaining).\"\n6. NEVER say \"I couldn't retrieve data\" when the data is provided in the request - just use it."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6126cb6a-d965-4155-99af-73fed0ab3e53",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        208
+      ],
+      "id": "d240b645-54ae-4d8d-b0c0-2dbebe2bfccd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Bp7VfJdApnukThJH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=={{ $json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "6824f86d-2056-4a8b-b149-f39070247744",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n   \"reply\": $json.output\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        0
+      ],
+      "id": "22cd8cf7-4496-4012-a72e-6b40d9711058",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "description": "Finds restaurants near the user. \nInputs:\n- keyword: type of food or cuisine (e.g., \"sushi\", \"cajun\", \"breakfast\")\n- radius: search radius in meters (optional, default 15000 = ~10 miles)\n\nExamples:\n- keyword=\"tacos\" (uses default 10 mile radius)\n- keyword=\"crawfish\", radius=40000 (searches 25 miles)",
+        "workflowId": {
+          "__rl": true,
+          "value": "jXfFYO4pUtW4t5KF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/jXfFYO4pUtW4t5KF",
+          "cachedResultName": "Tool - Find Restaurants"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lat": "={{ $json.lat }}",
+            "long": "={{ $json.long }}",
+            "radius": "={{ $json.radius || 15000 }}",
+            "keyword": "={{ $json.input }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "keyword",
+              "displayName": "keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "lat",
+              "displayName": "lat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "long",
+              "displayName": "long",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "radius",
+              "displayName": "radius",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        208
+      ],
+      "id": "47acbcbf-5a0b-47af-9eed-24e65515fc2b",
+      "name": "Call 'Tool - Find Restaurants'"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = items[0].json.body;\nconst DEFAULT_LAT = 32.3182;  // Cedar Creek Lake\nconst DEFAULT_LONG = -96.0553;\n\nlet lat = body.userLocation?.lat || body.lat || DEFAULT_LAT;\nlet long = body.userLocation?.long || body.long || DEFAULT_LONG;\n\nreturn {\n  json: {\n    ...body,\n    userLocation: { lat, long },\n    lat,\n    long\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        0
+      ],
+      "id": "9e8cd301-64d9-421f-8840-3b72bb2dff58",
+      "name": "Normalize Location"
+    },
+    {
+      "parameters": {
+        "description": "Gets the user's nutrition intake for today. Returns total calories, protein, carbs, fat, and a list of meals eaten. Use this when the user asks about their daily calories, what they've eaten, or needs nutrition-aware restaurant recommendations.",
+        "workflowId": {
+          "__rl": true,
+          "value": "ZecyT6CoFo883i3c",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/ZecyT6CoFo883i3c",
+          "cachedResultName": "Tool-Get Daily Nutrition"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "device_id": "={{ $json.device_id }}"
+          },
+          "matchingColumns": [
+            "device_id"
+          ],
+          "schema": [
+            {
+              "id": "device_id",
+              "displayName": "device_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        208
+      ],
+      "id": "68513fc9-2881-4e2a-ba38-2630338f72ad",
+      "name": "Call Tool - Get Daily Nutrition"
+    },
+    {
+      "parameters": {
+        "description": "Get the combined Food DNA profiles for a group of friends dining together. Use this tool when the user wants restaurant recommendations for themselves AND one or more friends. Pass the user_ids array of all people dining together (including the current user). Returns combined allergies, dietary restrictions, shared cuisine preferences, and individual taste profiles so you can recommend restaurants that work for everyone in the group.",
+        "workflowId": {
+          "__rl": true,
+          "value": "covntvo2jufHt1CU",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/covntvo2jufHt1CU",
+          "cachedResultName": "Tool - Get Group Food DNA"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        448
+      ],
+      "id": "4630de29-438b-49c3-9fda-7999d0fca0c3",
+      "name": "Call Tool - Get Group Food DNA"
+    },
+    {
+      "parameters": {
+        "description": "Find friends by name when the user mentions friend names in conversation. Use this tool when the user says things like \"find a restaurant for me and Bob\" or \"I'm eating with Sarah tonight.\" Pass the current user's user_id and an array of friend_names mentioned. Returns matched friends with their user_ids (for use with get_group_food_dna tool) and any names that couldn't be matched to the user's friends list.",
+        "workflowId": {
+          "__rl": true,
+          "value": "aBnKquRFZaLH842o",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/aBnKquRFZaLH842o",
+          "cachedResultName": "Tool - Find Friends by Name"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        432
+      ],
+      "id": "0b056fe9-c28a-4ec9-8649-3762f8706143",
+      "name": "Call Tool - Find Friends by Name"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Location",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Tool - Find Restaurants'": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Location": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Tool - Get Daily Nutrition": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Tool - Get Group Food DNA": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Call Tool - Find Friends by Name": {
+      "ai_tool": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5dda2cda-ce43-40dd-8f8b-868cea964bb4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "yfreVgfO3v4edGgH",
+  "tags": []
+}

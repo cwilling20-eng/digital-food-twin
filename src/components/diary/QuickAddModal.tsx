@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Loader2, Utensils } from 'lucide-react';
 
-const N8N_NUTRITION_URL = 'https://exponentmarketing.app.n8n.cloud/webhook/estimate-nutrition';
+import { WEBHOOK_NUTRITION_URL } from '../../config/api';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 type Feeling = 'Energized' | 'Satisfied' | 'Bloated' | 'Regret' | 'Hungry';
@@ -63,7 +63,7 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
 
     setIsEstimatingNutrition(true);
     try {
-      const response = await fetch(N8N_NUTRITION_URL, {
+      const response = await fetch(WEBHOOK_NUTRITION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ meal_name: meal.trim() })
@@ -104,7 +104,7 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
         if (debounceRef.current) clearTimeout(debounceRef.current);
         setIsEstimatingNutrition(true);
         try {
-          const response = await fetch(N8N_NUTRITION_URL, {
+          const response = await fetch(WEBHOOK_NUTRITION_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ meal_name: mealName.trim() })

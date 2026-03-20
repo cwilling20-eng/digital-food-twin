@@ -1,0 +1,145 @@
+{
+  "name": "Tool - Find Restaurants",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "keyword"
+            },
+            {
+              "name": "lat",
+              "type": "number"
+            },
+            {
+              "name": "long",
+              "type": "number"
+            },
+            {
+              "name": "radius",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "82c00dde-e4c7-427d-ae44-7a76c37d4013",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://places.googleapis.com/v1/places:searchText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Goog-Api-Key",
+              "value": "AIzaSyCvn3B70vwh7C4epR35Lh1ohRrk9hUfFiQ"
+            },
+            {
+              "name": "X-Goog-FieldMask",
+              "value": "places.displayName,places.formattedAddress,places.rating,places.priceLevel,places.primaryType,places.types,places.editorialSummary"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "=json",
+        "specifyBody": "json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"textQuery\": \"{{ $json.keyword }} restaurant\",\n  \"includedType\": \"restaurant\",\n  \"locationBias\": {\n    \"circle\": {\n      \"center\": {\n        \"latitude\": {{ $json.lat }},\n        \"longitude\": {{ $json.long }}\n      },\n      \"radius\": {{ $json.radius }}\n    }\n  },\n  \"maxResultCount\": 20\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "36f4cad3-b1f2-4322-ae3e-546d7aea6c8c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const keyword = items[0].json.keyword || 'restaurant';\nconst lat = items[0].json.lat || 32.3182;\nconst long = items[0].json.long || -96.0553;\nconst radius = items[0].json.radius || 24000;\n\nreturn {\n  json: {\n    keyword: keyword,\n    lat: lat,\n    long: long,\n    radius: radius\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        0
+      ],
+      "id": "3140be62-72c3-4a9c-9dbf-fb3ba618ada9",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const places = items[0].json.places || [];\nconst keyword = $('Code in JavaScript').first().json.keyword.toLowerCase();\n\n// Keywords that indicate a real BBQ restaurant\nconst bbqIndicators = ['bbq', 'barbecue', 'barbeque', 'smokehouse', 'smoke pit', 'smoked', 'brisket', 'ribs'];\n\nconst filtered = places.map(place => {\n  const name = (place.displayName?.text || '').toLowerCase();\n  const summary = (place.editorialSummary?.text || '').toLowerCase();\n  const types = (place.types || []).join(' ').toLowerCase();\n  \n  // Calculate relevance score\n  let score = 0;\n  \n  // Check if name contains BBQ-related terms\n  for (const term of bbqIndicators) {\n    if (name.includes(term)) score += 3;\n    if (summary.includes(term)) score += 2;\n  }\n  \n  // Check if it's classified as BBQ\n  if (types.includes('bbq') || types.includes('barbecue')) score += 3;\n  \n  // Penalize generic names that don't suggest BBQ\n  const genericNames = ['cafe', 'kitchen', 'grill', 'dock', 'backyard'];\n  for (const term of genericNames) {\n    if (name.includes(term) && score === 0) score -= 1;\n  }\n  \n  return {\n    ...place,\n    relevanceScore: score\n  };\n});\n\n// Sort by relevance, then by rating\nconst sorted = filtered\n  .sort((a, b) => {\n    if (b.relevanceScore !== a.relevanceScore) {\n      return b.relevanceScore - a.relevanceScore;\n    }\n    return (b.rating || 0) - (a.rating || 0);\n  });\n\nreturn { json: { places: sorted } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        0
+      ],
+      "id": "9bd59caa-e160-4e1b-a98d-85c54ecbdd89",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "60c5037f-db05-4058-94e1-d7d48f2b5a36",
+  "meta": {
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "jXfFYO4pUtW4t5KF",
+  "tags": []
+}

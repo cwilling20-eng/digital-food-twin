@@ -1,0 +1,124 @@
+{
+  "name": "Get History",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-history",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "68006f42-1658-4508-bd0e-0c41a9719f7b",
+      "name": "Webhook",
+      "webhookId": "1a8cb2b3-9cbb-41b5-a966-aa1860dd7dee"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "scans",
+        "limit": 10
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4a8d9cd1-7560-4d17-9fd1-b296bb96a62f",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sf62mjIrqsqjFw86",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        544,
+        0
+      ],
+      "id": "49cba6ab-e010-43d0-9996-4b2e8ccccca5",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "created_at",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        368,
+        0
+      ],
+      "id": "9dd8778d-669b-4d4c-88bd-15b387f0ee4e",
+      "name": "Sort"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "24b2fee4-516d-4a5b-90e8-af2f7abe2261",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "1t2rEOI5coQSk3Ya",
+  "tags": []
+}

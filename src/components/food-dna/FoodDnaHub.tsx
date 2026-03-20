@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   ArrowLeft,
   ShieldAlert,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { ProgressRing } from './SharedComponents';
 import { useFoodDna } from './useFoodDna';
+import { useProfile } from '../../contexts/ProfileContext';
 import { DietaryConstraintsSection } from './DietaryConstraintsSection';
 import { FlavorProfileSection } from './FlavorProfileSection';
 import { MealFavoritesSection } from './MealFavoritesSection';
@@ -83,6 +84,7 @@ function NavigationCard({
 
 export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
   const [currentSection, setCurrentSection] = useState<Section>('hub');
+  const { refreshProfile } = useProfile();
   const {
     loading,
     saving,
@@ -99,6 +101,32 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
     saveFoodDislikes
   } = useFoodDna();
 
+  // Wrap save functions to sync comprehensive profile after each save
+  const handleSaveDietaryConstraints = useCallback(async (...args: Parameters<typeof saveDietaryConstraints>) => {
+    await saveDietaryConstraints(...args);
+    await refreshProfile();
+  }, [saveDietaryConstraints, refreshProfile]);
+
+  const handleSaveFlavorProfile = useCallback(async (...args: Parameters<typeof saveFlavorProfile>) => {
+    await saveFlavorProfile(...args);
+    await refreshProfile();
+  }, [saveFlavorProfile, refreshProfile]);
+
+  const handleSaveMealFavorites = useCallback(async (...args: Parameters<typeof saveMealFavorites>) => {
+    await saveMealFavorites(...args);
+    await refreshProfile();
+  }, [saveMealFavorites, refreshProfile]);
+
+  const handleSaveCuisinePreference = useCallback(async (...args: Parameters<typeof saveCuisinePreference>) => {
+    await saveCuisinePreference(...args);
+    await refreshProfile();
+  }, [saveCuisinePreference, refreshProfile]);
+
+  const handleSaveFoodDislikes = useCallback(async (...args: Parameters<typeof saveFoodDislikes>) => {
+    await saveFoodDislikes(...args);
+    await refreshProfile();
+  }, [saveFoodDislikes, refreshProfile]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -114,7 +142,7 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
     return (
       <DietaryConstraintsSection
         data={dietaryConstraints}
-        onSave={saveDietaryConstraints}
+        onSave={handleSaveDietaryConstraints}
         onBack={() => setCurrentSection('hub')}
         saving={saving}
       />
@@ -125,7 +153,7 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
     return (
       <FlavorProfileSection
         data={flavorProfile}
-        onSave={saveFlavorProfile}
+        onSave={handleSaveFlavorProfile}
         onBack={() => setCurrentSection('hub')}
         saving={saving}
       />
@@ -136,7 +164,7 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
     return (
       <MealFavoritesSection
         data={mealFavorites}
-        onSave={saveMealFavorites}
+        onSave={handleSaveMealFavorites}
         onBack={() => setCurrentSection('hub')}
         saving={saving}
       />
@@ -147,7 +175,7 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
     return (
       <CuisineExpertiseSection
         data={cuisinePreferences}
-        onSave={saveCuisinePreference}
+        onSave={handleSaveCuisinePreference}
         onBack={() => setCurrentSection('hub')}
         saving={saving}
       />
@@ -158,7 +186,7 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
     return (
       <DislikesSection
         data={foodDislikes}
-        onSave={saveFoodDislikes}
+        onSave={handleSaveFoodDislikes}
         onBack={() => setCurrentSection('hub')}
         saving={saving}
       />

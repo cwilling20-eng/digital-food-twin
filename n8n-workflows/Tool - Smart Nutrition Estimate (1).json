@@ -1,0 +1,363 @@
+{
+  "name": "Tool - Smart Nutrition Estimate",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "meal_name"
+            },
+            {
+              "name": "restaurant_name"
+            },
+            {
+              "name": "device_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        -32
+      ],
+      "id": "1f8217e5-b1cc-487f-8f40-b3ed784971e2",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When Executed by Another Workflow').item.json.meal_name }}",
+        "options": {
+          "systemMessage": "You are a nutrition expert. Estimate nutritional content for food items.\n\nIMPORTANT: Estimate for a TYPICAL PORTION.\n\nReturn ONLY valid JSON, no markdown:\n{\n  \"calories\": <number>,\n  \"protein_g\": <number>,\n  \"carbs_g\": <number>,\n  \"fat_g\": <number>,\n  \"fiber_g\": <number>,\n  \"sugar_g\": <number>,\n  \"sodium_mg\": <number>,\n  \"confidence\": \"low\" | \"medium\" | \"high\"\n}\n\nGuidelines:\n- Single fruit (apple, banana): 80-120 cal\n- Single egg: 70-90 cal\n- Slice of bread: 70-100 cal\n- Chicken breast (6oz): 280-320 cal\n- Fast food meal: 800-1200 cal\n- Casual dining entree: 600-1000 cal\n- Salad with protein: 400-700 cal"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        384,
+        128
+      ],
+      "id": "5ac199e0-fb30-43a6-a257-e0397599d500",
+      "name": "AI Estimate"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        288
+      ],
+      "id": "3b687405-9575-473e-867e-3808ca7ad4c1",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Bp7VfJdApnukThJH",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = items[0].json;\nconst response = input.output || '';\n\nlet nutrition = {\n  source: 'ai',\n  found: false,\n  calories: 0,\n  protein_g: 0,\n  carbs_g: 0,\n  fat_g: 0,\n  fiber_g: 0,\n  sugar_g: 0,\n  sodium_mg: 0,\n  confidence: 'low'\n};\n\ntry {\n  let cleaned = response\n    .replace(/```json\\n?/g, '')\n    .replace(/```\\n?/g, '')\n    .trim();\n  \n  const parsed = JSON.parse(cleaned);\n  nutrition = {\n    source: 'ai',\n    found: true,\n    ...parsed\n  };\n} catch (e) {\n  console.log('Parse error:', e.message);\n}\n\nreturn { json: nutrition };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        128
+      ],
+      "id": "c021f379-aba2-4686-a2c1-0bf5d430b32a",
+      "name": "Parse AI Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allData = items.map(i => i.json);\nconst trigger = $('When Executed by Another Workflow').first().json;\n\nlet apiNinjas = allData.find(d => d.source === 'api-ninjas') || { found: false, calories: 0 };\nlet aiEstimate = allData.find(d => d.source === 'ai') || { found: false, calories: 0 };\n\nconst mealName = trigger.meal_name;\n\nlet result = {\n  meal_name: mealName,\n  calories: 0,\n  protein_g: 0,\n  carbs_g: 0,\n  fat_g: 0,\n  fiber_g: 0,\n  sugar_g: 0,\n  sodium_mg: 0,\n  confidence: 'low',\n  source: 'default',\n  notes: ''\n};\n\nconst apiFound = apiNinjas.found && apiNinjas.calories > 0;\nconst aiFound = aiEstimate.found && aiEstimate.calories > 0;\n\nif (apiFound && aiFound) {\n  const diff = Math.abs(apiNinjas.calories - aiEstimate.calories);\n  const avg = (apiNinjas.calories + aiEstimate.calories) / 2;\n  const diffPct = (diff / avg) * 100;\n\n  if (diffPct < 20) {\n    result.calories = Math.round(avg);\n    result.protein_g = Math.round((apiNinjas.protein_g + aiEstimate.protein_g) / 2);\n    result.carbs_g = Math.round((apiNinjas.carbs_g + aiEstimate.carbs_g) / 2);\n    result.fat_g = Math.round((apiNinjas.fat_g + aiEstimate.fat_g) / 2);\n    result.fiber_g = Math.round((apiNinjas.fiber_g + aiEstimate.fiber_g) / 2);\n    result.sugar_g = Math.round((apiNinjas.sugar_g + aiEstimate.sugar_g) / 2);\n    result.sodium_mg = Math.round((apiNinjas.sodium_mg + aiEstimate.sodium_mg) / 2);\n    result.confidence = 'high';\n    result.source = 'combined';\n    result.notes = 'Sources agree within 20%';\n  } else if (diffPct < 40) {\n    result.calories = Math.round(apiNinjas.calories * 0.6 + aiEstimate.calories * 0.4);\n    result.protein_g = Math.round(apiNinjas.protein_g * 0.6 + aiEstimate.protein_g * 0.4);\n    result.carbs_g = Math.round(apiNinjas.carbs_g * 0.6 + aiEstimate.carbs_g * 0.4);\n    result.fat_g = Math.round(apiNinjas.fat_g * 0.6 + aiEstimate.fat_g * 0.4);\n    result.fiber_g = Math.round(apiNinjas.fiber_g * 0.6 + aiEstimate.fiber_g * 0.4);\n    result.sugar_g = Math.round(apiNinjas.sugar_g * 0.6 + aiEstimate.sugar_g * 0.4);\n    result.sodium_mg = Math.round(apiNinjas.sodium_mg * 0.6 + aiEstimate.sodium_mg * 0.4);\n    result.confidence = 'medium';\n    result.source = 'combined';\n    result.notes = 'Sources differ by ' + Math.round(diffPct) + '%';\n  } else {\n    if (apiNinjas.calories > 50 && apiNinjas.calories < 2000) {\n      Object.assign(result, apiNinjas);\n      result.confidence = 'medium';\n      result.notes = 'Large disagreement, using API-Ninjas';\n    } else {\n      Object.assign(result, aiEstimate);\n      result.confidence = 'low';\n      result.notes = 'Large disagreement, using AI';\n    }\n  }\n} else if (apiFound) {\n  Object.assign(result, apiNinjas);\n  result.confidence = 'medium';\n  result.notes = 'API-Ninjas only';\n} else if (aiFound) {\n  Object.assign(result, aiEstimate);\n  result.notes = 'AI estimate only';\n} else {\n  result.calories = 200;\n  result.protein_g = 5;\n  result.carbs_g = 25;\n  result.fat_g = 8;\n  result.notes = 'No data available, using defaults';\n}\n\ndelete result.found;\nresult.meal_name = mealName;\n\nreturn { json: result };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        -16
+      ],
+      "id": "c6cf874f-5a35-41a7-b676-5c1fd995bbbc",
+      "name": "Cross-Reference & Merge"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        848,
+        -32
+      ],
+      "id": "a851823f-abe8-497d-bb14-ae0920ce2be2",
+      "name": "Wait for Both"
+    },
+    {
+      "parameters": {
+        "url": "https://api.api-ninjas.com/v1/nutrition",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $('When Executed by Another Workflow').item.json.meal_name }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "SFtH9pF1BWZvlN6RvDavnxDpkJwvu2Qci7WCvfDI"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        384,
+        -176
+      ],
+      "id": "e78de78d-30dc-43db-acca-f461a84076f3",
+      "name": "API-Ninjas",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = items[0].json;\n\n// API-Ninjas returns array directly, not nested in 'items'\nconst apiItems = Array.isArray(response) ? response : (response.items || []);\n\nif (apiItems.length === 0) {\n  return {\n    json: {\n      source: 'api-ninjas',\n      found: false,\n      calories: 0,\n      protein_g: 0,\n      carbs_g: 0,\n      fat_g: 0,\n      fiber_g: 0,\n      sugar_g: 0,\n      sodium_mg: 0\n    }\n  };\n}\n\nconst totals = {\n  source: 'api-ninjas',\n  found: true,\n  calories: 0,\n  protein_g: 0,\n  carbs_g: 0,\n  fat_g: 0,\n  fiber_g: 0,\n  sugar_g: 0,\n  sodium_mg: 0\n};\n\nfor (const item of apiItems) {\n  totals.calories += item.calories || 0;\n  totals.protein_g += item.protein_g || 0;\n  totals.carbs_g += item.carbohydrates_total_g || 0;\n  totals.fat_g += item.fat_total_g || 0;\n  totals.fiber_g += item.fiber_g || 0;\n  totals.sugar_g += item.sugar_g || 0;\n  totals.sodium_mg += item.sodium_mg || 0;\n}\n\nreturn { json: totals };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -176
+      ],
+      "id": "24b9ec72-a496-4341-8ffa-96df884b75ec",
+      "name": "Parse API Response"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "generic_menu_items",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name_normalized",
+              "condition": "eq",
+              "keyValue": "={{ $json.meal_name.toLowerCase().trim() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -32
+      ],
+      "id": "2de85168-ee43-480b-9744-a5ecef2a27df",
+      "name": "Check Universal DB",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "sf62mjIrqsqjFw86",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dba724b3-d0e5-45c9-a7ba-063ab3f5ff2c",
+              "leftValue": "={{ $json.calories }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        -32
+      ],
+      "id": "164397e4-d1dc-413f-b8d1-33819adc8188",
+      "name": "Found in DB?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const dbItem = items[0].json;\nconst trigger = $('When Executed by Another Workflow').first().json;\n\nreturn {\n  json: {\n    meal_name: trigger.meal_name,\n    calories: dbItem.calories,\n    protein_g: dbItem.protein_g || 0,\n    carbs_g: dbItem.carbs_g || 0,\n    fat_g: dbItem.fat_g || 0,\n    fiber_g: dbItem.fiber_g || 0,\n    sugar_g: dbItem.sugar_g || 0,\n    sodium_mg: dbItem.sodium_mg || 0,\n    confidence: dbItem.confidence || 'medium',\n    source: 'universal_db',\n    notes: 'From verified database (' + (dbItem.verification_count || 0) + ' verifications)'\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -320
+      ],
+      "id": "d6ee4278-5e95-4fe0-a4f3-114c37176112",
+      "name": "Return Cached"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Check Universal DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Estimate",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Estimate": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Wait for Both",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait for Both": {
+      "main": [
+        [
+          {
+            "node": "Cross-Reference & Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API-Ninjas": {
+      "main": [
+        [
+          {
+            "node": "Parse API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse API Response": {
+      "main": [
+        [
+          {
+            "node": "Wait for Both",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Universal DB": {
+      "main": [
+        [
+          {
+            "node": "Found in DB?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Found in DB?": {
+      "main": [
+        [
+          {
+            "node": "Return Cached",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API-Ninjas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Estimate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "02fde144-a387-498c-9f66-483f85083cd4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0e72e2a94e1abada14298c3e829097ef63577ff1eca745b6f76371244bdd4d6d"
+  },
+  "id": "bSuWvmm2Qf8vKBaw",
+  "tags": []
+}

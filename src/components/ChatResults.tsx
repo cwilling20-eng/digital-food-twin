@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ArrowLeft, Send, Loader2, ClipboardList, X, MapPin, AlertCircle, Wifi, WifiOff, Utensils, Users, UserPlus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { supabase } from '../lib/supabase';
 import { useGeolocation, type GeoLocation, type LocationStatus } from '../hooks/useGeolocation';
 import { useApp } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useMeals } from '../hooks/useMeals';
+import { useFriends } from '../hooks/useFriends';
 import { fetchUserFoodDNA, type UserFoodDNA } from '../utils/fetchUserFoodDNA';
-import type { ComprehensiveUserProfile, DiningContext, FriendFoodDna, PublicProfile } from '../types';
-
-const N8N_WEBHOOK_URL = 'https://exponentmarketing.app.n8n.cloud/webhook/chat';
-const N8N_NUTRITION_URL = 'https://exponentmarketing.app.n8n.cloud/webhook/estimate-nutrition';
+import type { ComprehensiveUserProfile, DiningContext, FriendFoodDna } from '../types';
+import { WEBHOOK_CHAT_URL, WEBHOOK_NUTRITION_URL } from '../config/api';
+import { Toast, useErrorToast } from './ui/Toast';
 
 interface Message {
   id: string;
@@ -29,7 +29,7 @@ interface TodayProgress {
 interface ChatResultsProps {
   initialAnalysis?: string;
   userProfile: ComprehensiveUserProfile;
-  deviceId: string;
+  userId: string;
   onBack: () => void;
   diningContext?: DiningContext;
   autoMessage?: string;
@@ -81,34 +81,6 @@ function getMealTypeFromTime(): MealType {
   return 'snack';
 }
 
-// Toast component for location feedback
-interface ToastProps {
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  icon?: React.ReactNode;
-  onDismiss?: () => void;
-}
-
-function Toast({ message, type, icon, onDismiss }: ToastProps) {
-  const bgColors = {
-    info: 'bg-blue-600',
-    success: 'bg-emerald-600',
-    warning: 'bg-amber-600',
-    error: 'bg-red-600'
-  };
-
-  return (
-    <div className={`fixed top-4 left-1/2 -translate-x-1/2 ${bgColors[type]} text-white px-4 py-3 rounded-xl shadow-lg z-50 flex items-center gap-3 animate-slide-down max-w-[90vw]`}>
-      {icon}
-      <span className="text-sm font-medium">{message}</span>
-      {onDismiss && (
-        <button onClick={onDismiss} className="ml-2 hover:bg-white/20 rounded-full p-1">
-          <X className="w-4 h-4" />
-        </button>
-      )}
-    </div>
-  );
-}
 
 // Location status indicator component
 function LocationIndicator({ status, location }: { status: LocationStatus; location: GeoLocation | null }) {
@@ -218,11 +190,12 @@ function NutritionPreview({
   );
 }
 
-export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, diningContext, autoMessage, onLogMeal }: ChatResultsProps) {
-  console.log("ChatResults mounted with props:", { autoMessage, diningContext });
+export function ChatResults({ initialAnalysis, userProfile, userId, onBack, diningContext, autoMessage, onLogMeal }: ChatResultsProps) {
   const { nutritionGoals, bodyMetrics } = useApp();
   const { user } = useAuth();
   const { location, status: locationStatus, statusMessage, error: locationError, requestLocation, clearError } = useGeolocation();
+  const { addMeal, fetchTodayProgress: hookFetchTodayProgress } = useMeals(userId);
+  const { loadAcceptedFriendsList, getFriendPublicProfile } = useFriends(userId);
   const autoMessageSentRef = useRef(false);
 
   const [foodDna, setFoodDna] = useState<UserFoodDNA | null>(null);
@@ -233,7 +206,6 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
   const [friendFoodDnaLoaded, setFriendFoodDnaLoaded] = useState(false);
   const [friendAddedToast, setFriendAddedToast] = useState<string | null>(null);
   const [showAddFriendPrompt, setShowAddFriendPrompt] = useState<{ name: string; show: boolean } | null>(null);
-  const hasInitializedRef = useRef(false);
 
   const getGroupDiningMessage = () => {
     if (!groupDining?.isGroupDining || groupDining.selectedFriendNames.length === 0) {
@@ -272,6 +244,7 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showMealToast, setShowMealToast] = useState(false);
+  const { errorMessage, showError, clearError: clearToastError } = useErrorToast();
   const [locationToast, setLocationToast] = useState<{ message: string; type: 'info' | 'success' | 'warning' | 'error' } | null>(null);
   
   // Nutrition estimation state
@@ -284,51 +257,29 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
   const sessionIdRef = useRef<string>(crypto.randomUUID());
 
   const loadFriendsList = useCallback(async () => {
-    const { data: friendsData } = await supabase
-      .from('user_friends')
-      .select('user_id, friend_id')
-      .or(`user_id.eq.${deviceId},friend_id.eq.${deviceId}`)
-      .eq('status', 'accepted');
-
-    if (!friendsData || friendsData.length === 0) return;
-
-    const friendIds = friendsData.map(f => f.user_id === deviceId ? f.friend_id : f.user_id);
-
-    const { data: profiles } = await supabase
-      .from('user_public_profiles')
-      .select('id, display_name, username')
-      .in('id', friendIds);
-
-    if (profiles) {
-      setFriendsList(profiles.map(p => ({
-        id: p.id,
-        displayName: p.display_name || `User ${p.id.slice(0, 6)}`,
-        username: p.username
+    const friends = await loadAcceptedFriendsList();
+    if (friends.length > 0) {
+      setFriendsList(friends.map(f => ({
+        id: f.id,
+        displayName: f.displayName,
+        username: null
       })));
     }
-  }, [deviceId]);
+  }, [loadAcceptedFriendsList]);
 
   const loadFriendFoodDna = useCallback(async (friendIds: string[]) => {
     if (friendIds.length === 0) return;
 
-    console.log("Loading Food DNA for friends:", friendIds);
     const dnaData: FriendFoodDna[] = [];
 
     for (const friendId of friendIds) {
       try {
-        const { data: profileData, error: profileError } = await supabase
-          .from('user_public_profiles')
-          .select('id, display_name, username, share_food_dna')
-          .eq('id', friendId)
-          .maybeSingle();
-
-        console.log(`Profile for friend ${friendId}:`, { profileData, profileError });
+        const profileData = await getFriendPublicProfile(friendId);
 
         const displayName = profileData?.display_name || profileData?.username || 'Friend';
         const sharesFoodDna = profileData?.share_food_dna ?? true;
 
         if (!sharesFoodDna) {
-          console.log(`Friend ${displayName} does not share Food DNA`);
           dnaData.push({
             userId: friendId,
             displayName,
@@ -352,7 +303,6 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
             restrictions: fullFoodDna.dietaryConstraints.restrictions,
             allergies: fullFoodDna.dietaryConstraints.allergies
           });
-          console.log(`Loaded Food DNA for ${displayName}:`, fullFoodDna);
         } else {
           dnaData.push({
             userId: friendId,
@@ -368,22 +318,16 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
       }
     }
 
-    console.log("Friend Food DNA loaded:", dnaData);
     setFriendFoodDna(dnaData);
     setFriendFoodDnaLoaded(true);
-  }, []);
+  }, [getFriendPublicProfile]);
 
   useEffect(() => {
     loadFriendsList();
   }, [loadFriendsList]);
 
   useEffect(() => {
-    console.log("Group dining useEffect triggered:", {
-      isGroupDining: groupDining?.isGroupDining,
-      selectedFriendIds: groupDining?.selectedFriendIds
-    });
     if (groupDining?.isGroupDining && groupDining.selectedFriendIds.length > 0) {
-      console.log("Calling loadFriendFoodDna with:", groupDining.selectedFriendIds);
       loadFriendFoodDna(groupDining.selectedFriendIds);
     } else {
       setFriendFoodDnaLoaded(true);
@@ -392,22 +336,18 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
 
   useEffect(() => {
     const loadUserFoodDna = async () => {
-      console.log("loadUserFoodDna called - user?.id:", user?.id, "deviceId:", deviceId);
-      const userId = user?.id || deviceId;
-      if (!userId) {
+      const id = user?.id || userId;
+      if (!id) {
         console.warn("No user ID available for Food DNA fetch");
         setFoodDnaLoaded(true);
         return;
       }
-      console.log("Fetching Food DNA for user:", userId);
       try {
-        const dna = await fetchUserFoodDNA(userId);
-        console.log("fetchUserFoodDNA returned:", dna);
+        const dna = await fetchUserFoodDNA(id);
         if (dna) {
           setFoodDna(dna);
-          console.log("Food DNA set in state:", dna);
         } else {
-          console.warn("No Food DNA found for user:", userId);
+          console.warn("No Food DNA found for user:", id);
         }
       } catch (error) {
         console.error("Error fetching user Food DNA:", error);
@@ -416,7 +356,7 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
       }
     };
     loadUserFoodDna();
-  }, [user?.id, deviceId]);
+  }, [user?.id, userId]);
 
   const matchFriendName = useCallback((text: string): FriendMatch | null => {
     const lowerText = text.toLowerCase();
@@ -487,7 +427,7 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
     setIsEstimatingNutrition(true);
 
     try {
-      const response = await fetch(N8N_NUTRITION_URL, {
+      const response = await fetch(WEBHOOK_NUTRITION_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ meal_name: meal.trim() })
@@ -539,36 +479,17 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
   }, []);
 
   const fetchTodayProgress = useCallback(async () => {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
-
-    const { data, error } = await supabase
-      .from('meal_logs')
-      .select('estimated_calories, protein_g, carbs_g, fat_g')
-      .eq('user_id', deviceId)
-      .gte('created_at', todayStart.toISOString())
-      .lte('created_at', todayEnd.toISOString());
-
-    if (error) {
-      console.error('Error fetching today meals:', error);
-      return;
+    const result = await hookFetchTodayProgress();
+    if (result) {
+      setTodayProgress({
+        calories_consumed: result.calories,
+        protein_consumed: result.protein,
+        carbs_consumed: result.carbs,
+        fat_consumed: result.fat,
+        meals_logged: result.mealsLogged,
+      });
     }
-
-    const progress: TodayProgress = {
-      calories_consumed: 0, protein_consumed: 0, carbs_consumed: 0, fat_consumed: 0, meals_logged: data?.length || 0
-    };
-
-    for (const meal of data || []) {
-      progress.calories_consumed += meal.estimated_calories || 0;
-      progress.protein_consumed += meal.protein_g || 0;
-      progress.carbs_consumed += meal.carbs_g || 0;
-      progress.fat_consumed += meal.fat_g || 0;
-    }
-
-    setTodayProgress(progress);
-  }, [deviceId]);
+  }, [hookFetchTodayProgress]);
 
   useEffect(() => {
     fetchTodayProgress();
@@ -613,9 +534,7 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
   }, [locationError, clearError]);
 
   const sendMessage = useCallback(async (messageText: string) => {
-    console.log("sendMessage called with:", messageText, "isTyping:", isTyping);
     if (!messageText.trim() || isTyping) {
-      console.log("sendMessage early return - empty or typing");
       return;
     }
 
@@ -652,7 +571,7 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
       const payload: Record<string, unknown> = {
         chatInput: messageText,
         sessionId: sessionIdRef.current,
-        device_id: deviceId,
+        user_id: userId,
         userProfile: foodDna || userProfile,
         foodDna: foodDna,
         nutritionStatus: {
@@ -692,11 +611,6 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
       };
 
       if (groupDining?.isGroupDining) {
-        console.log("Building dining context with:", {
-          selectedFriendIds: groupDining.selectedFriendIds,
-          selectedFriendNames: groupDining.selectedFriendNames,
-          friendFoodDnaState: friendFoodDna
-        });
         payload.diningContext = {
           isGroupDining: true,
           selectedFriendIds: groupDining.selectedFriendIds,
@@ -707,17 +621,12 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
         };
       }
 
-      console.log("Making API request to:", N8N_WEBHOOK_URL);
-      console.log("Payload foodDna:", foodDna);
-      console.log("Payload diningContext:", payload.diningContext);
-
-      const response = await fetch(N8N_WEBHOOK_URL, {
+      const response = await fetch(WEBHOOK_CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      console.log("API response status:", response.status);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = await response.json();
@@ -744,7 +653,7 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
     } finally {
       setIsTyping(false);
     }
-  }, [isTyping, matchFriendName, addFriendToGroup, extractPossibleName, ensureLocation, deviceId, userProfile, foodDna, nutritionGoals, todayProgress, bodyMetrics, initialAnalysis, groupDining, friendFoodDna]);
+  }, [isTyping, matchFriendName, addFriendToGroup, extractPossibleName, ensureLocation, userId, userProfile, foodDna, nutritionGoals, todayProgress, bodyMetrics, initialAnalysis, groupDining, friendFoodDna]);
 
   const handleSend = () => {
     if (!inputMessage.trim()) return;
@@ -754,17 +663,8 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
   };
 
   useEffect(() => {
-    console.log("useEffect for autoMessage triggered:", {
-      autoMessage,
-      alreadySent: autoMessageSentRef.current,
-      foodDnaLoaded,
-      friendFoodDnaLoaded
-    });
     if (autoMessage && !autoMessageSentRef.current && foodDnaLoaded && friendFoodDnaLoaded) {
       autoMessageSentRef.current = true;
-      console.log("Sending autoMessage now that data is loaded:", autoMessage);
-      console.log("Current foodDna:", foodDna);
-      console.log("Current friendFoodDna:", friendFoodDna);
       sendMessage(autoMessage);
     }
   }, [autoMessage, sendMessage, foodDnaLoaded, friendFoodDnaLoaded, foodDna, friendFoodDna]);
@@ -782,38 +682,28 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
     setIsSaving(true);
 
     try {
-      const mealLogData: any = {
-        user_id: deviceId,
+      const result = await addMeal({
         meal_name: mealName.trim(),
         feeling: selectedFeeling,
         notes: notes.trim() || null,
-        meal_type: selectedMealType || getMealTypeFromTime()
-      };
+        meal_type: selectedMealType || getMealTypeFromTime(),
+        nutrition: nutritionEstimate ? {
+          calories: nutritionEstimate.calories,
+          protein_g: nutritionEstimate.protein_g,
+          carbs_g: nutritionEstimate.carbs_g,
+          fat_g: nutritionEstimate.fat_g,
+          fiber_g: nutritionEstimate.fiber_g,
+          sugar_g: nutritionEstimate.sugar_g,
+          sodium_mg: nutritionEstimate.sodium_mg,
+        } : null,
+      });
 
-      // Add nutrition data if available
-      if (nutritionEstimate) {
-        mealLogData.estimated_calories = nutritionEstimate.calories;
-        mealLogData.protein_g = nutritionEstimate.protein_g;
-        mealLogData.carbs_g = nutritionEstimate.carbs_g;
-        mealLogData.fat_g = nutritionEstimate.fat_g;
-        mealLogData.fiber_g = nutritionEstimate.fiber_g;
-        mealLogData.sugar_g = nutritionEstimate.sugar_g;
-        mealLogData.sodium_mg = nutritionEstimate.sodium_mg;
-      }
-
-      console.log('💾 Saving meal to Supabase:', mealLogData);
-
-      const { error } = await supabase
-        .from('meal_logs')
-        .insert(mealLogData);
-
-      if (error) {
-        console.error('❌ Error saving meal log:', error);
-        alert(`Failed to save meal log: ${error.message}`);
+      if (result.error) {
+        console.error('❌ Error saving meal log:', result.error);
+        showError(`Failed to save meal log: ${result.error}`);
         return;
       }
 
-      console.log('Meal log saved successfully');
       fetchTodayProgress();
 
       setShowLogModal(false);
@@ -827,7 +717,7 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
       setTimeout(() => setShowMealToast(false), 3000);
     } catch (error) {
       console.error('❌ Exception saving meal log:', error);
-      alert(`Failed to save meal log: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showError(`Failed to save meal log: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
@@ -848,6 +738,16 @@ export function ChatResults({ initialAnalysis, userProfile, deviceId, onBack, di
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Error Toast */}
+      {errorMessage && (
+        <Toast
+          message={errorMessage}
+          type="error"
+          icon={<AlertCircle className="w-4 h-4 flex-shrink-0" />}
+          onDismiss={clearToastError}
+          duration={5000}
+        />
+      )}
       {/* Location Toast */}
       {locationToast && (
         <Toast 

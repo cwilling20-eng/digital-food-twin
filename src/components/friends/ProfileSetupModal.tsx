@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, User, AtSign, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { usePublicProfile } from '../../hooks/usePublicProfile';
 import type { PublicProfile } from '../../types';
 
 interface ProfileSetupModalProps {
@@ -32,6 +32,7 @@ export function ProfileSetupModal({
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { checkUsernameAvailable: checkAvailable, upsertProfile } = usePublicProfile(userId);
 
   const validateUsername = (value: string): boolean => {
     if (value.length < 3) {
@@ -50,16 +51,10 @@ export function ProfileSetupModal({
     if (!validateUsername(value)) return false;
 
     setChecking(true);
-    const { data } = await supabase
-      .from('user_public_profiles')
-      .select('id')
-      .eq('username', value.toLowerCase())
-      .neq('id', userId)
-      .maybeSingle();
-
+    const available = await checkAvailable(value);
     setChecking(false);
 
-    if (data) {
+    if (!available) {
       setUsernameError('Username is already taken');
       return false;
     }
@@ -76,20 +71,16 @@ export function ProfileSetupModal({
 
     setSaving(true);
 
-    const { error } = await supabase
-      .from('user_public_profiles')
-      .upsert({
-        id: userId,
-        username: username.toLowerCase(),
-        display_name: displayName,
-        avatar_url: selectedAvatar,
-        share_food_dna: shareFoodDna,
-        updated_at: new Date().toISOString()
-      });
+    const result = await upsertProfile({
+      username,
+      displayName,
+      avatarUrl: selectedAvatar,
+      shareFoodDna,
+    });
 
     setSaving(false);
 
-    if (!error) {
+    if (!result.error) {
       onSave();
     }
   };
