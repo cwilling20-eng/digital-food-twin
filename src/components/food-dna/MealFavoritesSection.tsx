@@ -92,9 +92,9 @@ export function MealFavoritesSection({
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
                     activeTab === tab.id
-                      ? 'bg-emerald-500 text-white'
+                      ? 'bg-nm-bg0 text-white'
                       : hasData
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      ? 'bg-nm-bg text-nm-text border border-nm-surface-high'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -145,7 +145,7 @@ export function MealFavoritesSection({
               ? 'bg-green-500 text-white'
               : saving
               ? 'bg-gray-400 text-white cursor-not-allowed'
-              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 active:scale-[0.98]'
+              : 'bg-nm-signature hover:bg-nm-text text-white shadow-lg shadow-nm-signature/30 active:scale-[0.98]'
           }`}
         >
           {savedTabs[activeTab] ? (

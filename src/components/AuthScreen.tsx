@@ -60,11 +60,11 @@ export function AuthScreen({ onSignIn, onSignUp }: AuthScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-nm-bg via-white to-nm-bg flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-500/20">
+            <div className="w-16 h-16 bg-nm-bg0 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-nm-bg0/20">
               <Utensils className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
@@ -91,7 +91,7 @@ export function AuthScreen({ onSignIn, onSignUp }: AuthScreenProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm bg-white"
+                  className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-nm-bg0 focus:border-nm-bg0 outline-none transition-all text-sm bg-white"
                 />
               </div>
             </div>
@@ -109,7 +109,7 @@ export function AuthScreen({ onSignIn, onSignUp }: AuthScreenProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={mode === 'signup' ? 'At least 6 characters' : 'Enter your password'}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  className="w-full pl-11 pr-11 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm bg-white"
+                  className="w-full pl-11 pr-11 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-nm-bg0 focus:border-nm-bg0 outline-none transition-all text-sm bg-white"
                 />
                 <button
                   type="button"
@@ -135,7 +135,7 @@ export function AuthScreen({ onSignIn, onSignUp }: AuthScreenProps) {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm your password"
                     autoComplete="new-password"
-                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm bg-white"
+                    className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-nm-bg0 focus:border-nm-bg0 outline-none transition-all text-sm bg-white"
                   />
                 </div>
               </div>
@@ -148,7 +148,7 @@ export function AuthScreen({ onSignIn, onSignUp }: AuthScreenProps) {
             )}
 
             {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-xl text-sm">
+              <div className="bg-nm-bg border border-nm-surface text-nm-text px-4 py-3 rounded-xl text-sm">
                 {successMessage}
               </div>
             )}
@@ -156,7 +156,7 @@ export function AuthScreen({ onSignIn, onSignUp }: AuthScreenProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
+              className="w-full py-3 bg-nm-bg0 hover:bg-nm-signature disabled:bg-nm-surface-highest text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-nm-bg0/20 active:scale-[0.98]"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -174,7 +174,7 @@ export function AuthScreen({ onSignIn, onSignUp }: AuthScreenProps) {
               {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}
               <button
                 onClick={switchMode}
-                className="ml-1.5 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
+                className="ml-1.5 text-nm-signature font-semibold hover:text-nm-text transition-colors"
               >
                 {mode === 'login' ? 'Sign Up' : 'Sign In'}
               </button>

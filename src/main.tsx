@@ -24,7 +24,7 @@ class ErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-6">
+        <div className="min-h-screen bg-gradient-to-b from-nm-bg to-white flex items-center justify-center p-6">
           <div className="text-center max-w-md">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
             <p className="text-gray-600 mb-6">
@@ -32,7 +32,7 @@ class ErrorBoundary extends Component<
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg transition-colors"
+              className="px-6 py-3 bg-nm-bg0 hover:bg-nm-signature text-white font-semibold rounded-lg transition-colors"
             >
               Refresh App
             </button>

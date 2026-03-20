@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8f5ff; /* Fallback to theme background */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffefec",
+              "surface-container": "#e8e5ff",
+              "primary-fixed-dim": "#f56364",
+              "secondary-fixed": "#ffc789",
+              "on-tertiary-fixed": "#004d49",
+              "inverse-on-surface": "#9c9ab4",
+              "tertiary-dim": "#005a55",
+              "on-tertiary-container": "#00625c",
+              "secondary-fixed-dim": "#ffb55b",
+              "primary-container": "#ff7574",
+              "primary-fixed": "#ff7574",
+              "on-tertiary": "#befff8",
+              "on-surface-variant": "#5a5971",
+              "tertiary": "#006761",
+              "secondary": "#835000",
+              "primary": "#aa2c32",
+              "on-secondary-fixed": "#4d2d00",
+              "on-secondary": "#fff0e4",
+              "outline": "#75748d",
+              "surface": "#f8f5ff",
+              "surface-bright": "#f8f5ff",
+              "surface-dim": "#d3d1f8",
+              "tertiary-fixed-dim": "#76f0e7",
+              "inverse-primary": "#ff6b6b",
+              "tertiary-container": "#85fff5",
+              "on-surface": "#2d2d42",
+              "surface-container-low": "#f2efff",
+              "on-error-container": "#520c00",
+              "on-primary": "#ffefee",
+              "on-secondary-fixed-variant": "#744600",
+              "surface-tint": "#aa2c32",
+              "on-primary-fixed": "#000000",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-highest": "#dbd9ff",
+              "on-secondary-container": "#673e00",
+              "background": "#f8f5ff",
+              "error": "#b02500",
+              "on-background": "#2d2d42",
+              "on-primary-container": "#4e0009",
+              "inverse-surface": "#0c0c1f",
+              "secondary-container": "#ffc789",
+              "primary-dim": "#992027",
+              "surface-variant": "#dbd9ff",
+              "error-container": "#f95630",
+              "on-primary-fixed-variant": "#60000d",
+              "surface-container-high": "#e2dfff",
+              "secondary-dim": "#734500",
+              "error-dim": "#b92902",
+              "tertiary-fixed": "#85fff5",
+              "on-tertiary-fixed-variant": "#006d67",
+              "outline-variant": "#acaac5"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#FFFAF5] text-[#1A1A2E] min-h-screen pb-32">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-40 bg-[#FFFAF5]/80 backdrop-blur-[24px] flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgzKcOSzV3uS4W5wHW2gMt6u1xJVy5CQzQOrcAG171dJjqTtD7oT1BIr_CN8G1yU4zKEpfO-fvDJYRMaXhEz91rys2vZJHLvhNVFQ9KjNW0rwzCfqnv7QQz1-I1sEW7PkFIiEjd1uH6Rkg-0b8Nl6Ps8Bn0yvvLeO52JuQ0zd8LTe_TCRatRqFXIwgMPmHL_XMRNQRGP2dd-x0eT4pxImh1D3QLJwSjlyEmjKNdgiBpcfxX6oyCefhfhIXNDKSLBtE01-q_eP2p3Nw"/>
+</div>
+<h1 class="text-2xl font-black text-[#AA2C32] tracking-tighter">NomMigo</h1>
+</div>
+<button class="w-12 h-12 flex items-center justify-center rounded-full bg-surface-container-low text-on-surface-variant hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="px-6 max-w-2xl mx-auto space-y-8 mt-4">
+<!-- Header Section -->
+<section class="space-y-4">
+<div class="flex flex-col gap-2">
+<span class="inline-flex items-center px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-bold text-[12px] uppercase tracking-widest w-fit">
+                    24 items analyzed
+                </span>
+<h2 class="text-4xl font-extrabold tracking-tight text-on-surface leading-tight">The Burger Bistro</h2>
+</div>
+<!-- Mode Toggle -->
+<div class="bg-surface-container-low p-1.5 rounded-full flex items-center w-full max-w-[320px]">
+<button class="flex-1 py-2.5 px-6 rounded-full bg-white shadow-sm text-primary font-bold text-sm transition-all">
+                    Goal Mode
+                </button>
+<button class="flex-1 py-2.5 px-6 rounded-full text-on-surface-variant font-bold text-sm hover:bg-white/50 transition-all">
+                    Enjoyment
+                </button>
+</div>
+</section>
+<!-- Top Pick (#1) -->
+<section class="space-y-4">
+<div class="relative group">
+<div class="absolute top-4 right-4 z-10 bg-gradient-to-r from-primary to-primary-container text-white px-4 py-2 rounded-full font-bold shadow-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                    98% Match
+                </div>
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_40px_60px_-15px_rgba(170,44,50,0.06)]">
+<div class="h-64 w-full relative">
+<img class="w-full h-full object-cover" data-alt="Gourmet grilled chicken burger with avocado and fresh greens" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxQKL1GtygE3eXdb8f6Dq1tDtWNdowcd0SlU21--NI7TuAgzibKNHPd_QuFz2ZXdYSnHvYXVVDH7xURDI5mHwoxxXNIOpZ7NZMcfTqTeZOQ4pKlzXvUlrrStern5Bl8hH6Lf0aLtz-DhwGlG3GGehiGx5lJgx94MyIHETMWWd4_CYDIUpkNHpexUaxs59QOXm1gMN9QYj-1DylGk033DEfMJ8WlzxuGvmIvCZxwZlaORgXOsKvQCga-3SlLTRcSIqXI2Tfp-3wtUzH"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+</div>
+<div class="p-8 space-y-6">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="text-2xl font-bold text-on-surface">Avocado Grilled Chicken</h3>
+<p class="text-on-surface-variant font-medium mt-1">420 kcal • High Protein</p>
+</div>
+</div>
+<!-- Macro Pills -->
+<div class="flex gap-3">
+<div class="px-4 py-2 rounded-lg bg-tertiary-container/30 flex flex-col items-center min-w-[70px]">
+<span class="text-[10px] uppercase font-bold text-tertiary">Prot</span>
+<span class="text-lg font-bold text-tertiary">38g</span>
+</div>
+<div class="px-4 py-2 rounded-lg bg-secondary-container/30 flex flex-col items-center min-w-[70px]">
+<span class="text-[10px] uppercase font-bold text-secondary">Carb</span>
+<span class="text-lg font-bold text-secondary">42g</span>
+</div>
+<div class="px-4 py-2 rounded-lg bg-error-container/10 flex flex-col items-center min-w-[70px]">
+<span class="text-[10px] uppercase font-bold text-error">Fat</span>
+<span class="text-lg font-bold text-error">12g</span>
+</div>
+</div>
+<!-- NomMigo Logic Card -->
+<div class="bg-surface-container-low p-6 rounded-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+<h4 class="font-bold text-primary flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                Why NomMigo chose this
+                            </h4>
+<p class="text-on-surface-variant leading-relaxed text-sm">
+                                Perfectly aligns with your 40g protein target while staying under your fat budget. The healthy fats from avocado will keep you satiated longer during your afternoon meetings.
+                            </p>
+</div>
+<button class="w-full py-5 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-extrabold text-lg shadow-[0_20px_40px_rgba(170,44,50,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all">
+                            Log this meal
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Picks #2 and #3 -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Pick #2 -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.03)] space-y-4 flex flex-col">
+<div class="relative h-40 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Fresh quinoa salmon salad bowl with light dressing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBWjku39cQ8LyJSKsy0ZMJYb2aRZKXPd7fgSxoDQMUwDFC0WEkAqoHuwmRtdQCyGsviACKn9lN7Wquh5hQNTXvMkH7kmfc86NYx5Q2zjrdCS0xsO5Rb1Ibgh0NDqJ2Tz81o1X_XMV-ghNFLJ_tdvd9zXMzf4xjN9m9vTZB3LAqzbUHy-FUa2fRF-nJwEedkrJWf0mM4VzxfuZAQG779eGvxFdGWp2V8VDhlHzcrNdUSXcqiHmgdd0CKd54iERhwU5WbIW_R7V5I-bF"/>
+<span class="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm">92% Match</span>
+</div>
+<div class="flex-1 space-y-2">
+<h4 class="font-bold text-on-surface">Zesty Salmon Bowl</h4>
+<p class="text-xs text-on-surface-variant line-clamp-2">High in Omega-3s. A great swap if you want something lighter than a burger.</p>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="text-sm font-bold text-on-surface">510 kcal</span>
+<button class="bg-surface-container-low p-2.5 rounded-full text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">add</span>
+</button>
+</div>
+</div>
+<!-- Pick #3 -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.03)] space-y-4 flex flex-col">
+<div class="relative h-40 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Lean steak strips with roasted vegetables and sweet potato" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCZcBiF30JITloxqpbOeFgQzvUWrHH1i4VZVeHv92Pju1yCswRBfxVer1tdgK1fQu90qHri6GqQ3Xyuddqy2ryypUkwtudZTKAs6VcDmratWxQPZpCl69n3x-kKUpdv_fiCJFkRSlP3HN9MIbjtaj5nV0rOC11tYUaUJ49HhELJozs05uAyZiw5w5wVfaCT-VeVQ4R9CDQaN0e6wJAAcRNUCr94o9POUdwSrLf--p_RZoLuD-uXdcNuJagl3jzDIsYzzS4aJIbivio"/>
+<span class="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm">88% Match</span>
+</div>
+<div class="flex-1 space-y-2">
+<h4 class="font-bold text-on-surface">Lean Steak &amp; Greens</h4>
+<p class="text-xs text-on-surface-variant line-clamp-2">High iron content. Fits your carb cycling day perfectly with sweet potato.</p>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="text-sm font-bold text-on-surface">480 kcal</span>
+<button class="bg-surface-container-low p-2.5 rounded-full text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Other Healthy Swaps -->
+<section class="space-y-4 pb-12">
+<h3 class="text-xl font-bold text-on-surface px-2">Other Healthy Swaps</h3>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar px-2 pb-4 -mx-2">
+<!-- Swap 1 -->
+<div class="flex-none w-40 space-y-3">
+<div class="h-40 rounded-lg overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" data-alt="Greek chicken wrap with crisp lettuce and yogurt sauce" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgPi1jtmdhme8oCa7YBf5jEhgHMlpc_ou0qFjMPgKWo6LMzliVPtS2B1mss0x69uT7FAq5v8Zej0oPaUYBjBzdwLQ4K2lma_q1ou3RqluRDYB6OlZWYBZjYuZ_26r-OgT1jmwzwXYRtsB4QLmQcL0QEOQwCXQkKSL1lRZ_KA84QXV1k3u5oBJoexpgMAlv4S88jwBMAWWQP6hIHZRhBDDNDMlXofCdxceoPTO0GYdMdFdH2FWB88yEGpbjwouwfk-9fLmCazU5A9WY"/>
+</div>
+<p class="font-bold text-sm text-center px-2">Greek Chicken Wrap</p>
+</div>
+<!-- Swap 2 -->
+<div class="flex-none w-40 space-y-3">
+<div class="h-40 rounded-lg overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" data-alt="Classic garden salad with boiled egg and balsamic vinaigrette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0o5innKdWii78eZkq7J7E_JBkBUbmgf5BKxFguFIiJO_DokHrcpRG9o0o7jUO8sGTKfVOHFF9p-CVeofsqsyFnqQFkIBBG24OaA4L3uxZZ30MLxN_tL3PrheoZpdjLWT0bRNKam83YCM_jjDQhNLxh-wXphU_qIafBXP7VaxthxespX6SYR_xhZVrYJmYk4gc7MnPX8MRr9qdMkxZWWxV6KaNNjCnpGI3jYwuG_MyMj_6-DnK7awg0hFtJb8nY2xWRJ8BANhxN9gt"/>
+</div>
+<p class="font-bold text-sm text-center px-2">Garden Protein Salad</p>
+</div>
+<!-- Swap 3 -->
+<div class="flex-none w-40 space-y-3">
+<div class="h-40 rounded-lg overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" data-alt="Spicy mediterranean vegetable bowl with chickpeas" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3mf66HzxFcZcYdaHeXsVRm7SickTrCLP7YTDDnV7FTuCgt_w0eTJsOm2v9-YA0lJ3FG2eAL3IfBfCuJ0Wkn-NdlbnFmPGWuVdC3WiIq-suXHarzrHPXCBCY16GT5hMMIW7uL4JkxdIXEKJae4PHxDV4gqbOuXCrEZ2q7eTx4OJ5CUbFkxrPD8cd4nPQgv21sfb_LDJHdwmXNxphCRhcaQfaMmWr9sr2LFXucro2Oxbt1pB5LfNoaUR2b3sZ70NZPv48NuBi0bEygp"/>
+</div>
+<p class="font-bold text-sm text-center px-2">Veggie Power Bowl</p>
+</div>
+<!-- Swap 4 -->
+<div class="flex-none w-40 space-y-3">
+<div class="h-40 rounded-lg overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover transition-transform hover:scale-110 duration-500" data-alt="Grilled tilapia fish with asparagus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLjhuH51ERrsw0fJUaVBlz6f7qAjAm8TZAwrEnLzizXssLSjtesWYdlcSPY2a9Sg6FiK63LJza3PRJXeu7cSnOCuBYIFvuEZr0yGdvXCuo3-wSfsgFdLzLqyL-5hPqkNhBg4R87x0hWkbrnkql2yW5YEl8MI40ihoj1jx69iaHI_4YSL55wZyNfa8WMftFNjAVTMEMLnqSlwHARb9IG3JIYFu0AbIlvdL7-BGB3wygD0kLzaxKgLJpTLzjLdt4qXozzKpqSaV9KhqQ"/>
+</div>
+<p class="font-bold text-sm text-center px-2">Grilled Tilapia</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Floating Pill) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center px-4 pb-8 pointer-events-none">
+<div class="bg-[#FFFAF5]/80 dark:bg-slate-900/80 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(255,107,107,0.15)] rounded-full flex justify-around items-center px-4 py-2 w-[90%] max-w-md pointer-events-auto">
+<!-- Home -->
+<button class="flex flex-col items-center justify-center text-slate-400 p-2 hover:scale-105 transition-transform active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-[10px] uppercase tracking-widest mt-1">Home</span>
+</button>
+<!-- Meal Log (Active) -->
+<button class="flex flex-col items-center justify-center bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] text-white rounded-full p-4 scale-110 shadow-lg transition-all duration-300 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+</button>
+<!-- Social -->
+<button class="flex flex-col items-center justify-center text-slate-400 p-2 hover:scale-105 transition-transform active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-[10px] uppercase tracking-widest mt-1">Social</span>
+</button>
+<!-- Profile -->
+<button class="flex flex-col items-center justify-center text-slate-400 p-2 hover:scale-105 transition-transform active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-[10px] uppercase tracking-widest mt-1">Profile</span>
+</button>
+</div>
+</nav>
+</body></html>

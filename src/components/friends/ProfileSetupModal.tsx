@@ -11,12 +11,12 @@ interface ProfileSetupModalProps {
 }
 
 const DEFAULT_AVATARS = [
-  { id: 'emerald', gradient: 'from-emerald-400 to-teal-500' },
-  { id: 'blue', gradient: 'from-blue-400 to-cyan-500' },
-  { id: 'purple', gradient: 'from-violet-400 to-purple-500' },
-  { id: 'pink', gradient: 'from-pink-400 to-rose-500' },
-  { id: 'amber', gradient: 'from-amber-400 to-orange-500' },
-  { id: 'red', gradient: 'from-red-400 to-rose-500' }
+  { id: 'emerald', gradient: 'from-nm-signature to-nm-signature-light' },
+  { id: 'blue', gradient: 'from-nm-success to-nm-success' },
+  { id: 'purple', gradient: 'from-nm-accent to-nm-signature' },
+  { id: 'pink', gradient: 'from-nm-signature-light to-nm-accent' },
+  { id: 'amber', gradient: 'from-nm-accent to-nm-accent' },
+  { id: 'red', gradient: 'from-nm-signature to-nm-signature' }
 ];
 
 export function ProfileSetupModal({
@@ -93,28 +93,29 @@ export function ProfileSetupModal({
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[90vh] overflow-y-auto animate-slide-up">
-        <div className="sticky top-0 bg-white px-6 pt-4 pb-3 border-b border-gray-100">
+      <div className="absolute bottom-0 left-0 right-0 bg-nm-surface-lowest rounded-[2rem] rounded-b-none max-h-[90vh] overflow-y-auto animate-slide-up">
+        <div className="sticky top-0 bg-nm-surface-lowest px-8 pt-5 pb-4 rounded-t-[2rem]">
+          <div className="w-10 h-1 bg-nm-surface-high rounded-full mx-auto mb-4" />
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">Set Up Your Profile</h2>
+            <h2 className="text-xl font-bold text-nm-text">Set Up Your Profile</h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-nm-surface transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-nm-text/40" />
             </button>
           </div>
         </div>
 
-        <div className="px-6 py-6 space-y-6">
+        <div className="px-8 py-6 space-y-6">
           <div className="text-center">
-            <p className="text-gray-600">
+            <p className="text-nm-text/60">
               Create a profile so friends can find and add you
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-3">
               Choose Avatar Color
             </label>
             <div className="flex justify-center gap-3">
@@ -122,9 +123,9 @@ export function ProfileSetupModal({
                 <button
                   key={avatar.id}
                   onClick={() => setSelectedAvatar(avatar.id)}
-                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-white font-bold transition-all ${
+                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${avatar.gradient} flex items-center justify-center text-white font-bold transition-all active:scale-95 ${
                     selectedAvatar === avatar.id
-                      ? 'ring-4 ring-emerald-500/50 scale-110'
+                      ? 'ring-4 ring-nm-signature/30 scale-110'
                       : 'hover:scale-105'
                   }`}
                 >
@@ -135,7 +136,7 @@ export function ProfileSetupModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">
               <User className="w-4 h-4 inline mr-1" />
               Display Name
             </label>
@@ -144,12 +145,12 @@ export function ProfileSetupModal({
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your name"
-              className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+              className="w-full px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">
               <AtSign className="w-4 h-4 inline mr-1" />
               Username
             </label>
@@ -166,50 +167,50 @@ export function ProfileSetupModal({
                 }}
                 onBlur={() => username.length >= 3 && checkUsernameAvailable(username)}
                 placeholder="your_username"
-                className={`w-full px-4 py-3 bg-gray-50 rounded-xl border outline-none transition-all ${
+                className={`w-full px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none transition-all ${
                   usernameError
-                    ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                    : 'border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                    ? 'ring-2 ring-nm-signature/40 bg-nm-signature/5'
+                    : 'focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40'
                 }`}
               />
               {checking && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <div className="w-5 h-5 border-2 border-nm-signature border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
             </div>
             {usernameError && (
-              <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+              <p className="mt-2 text-sm text-nm-signature flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
                 {usernameError}
               </p>
             )}
-            <p className="mt-1.5 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-nm-text/40">
               This is how friends will find you
             </p>
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-nm-surface rounded-[2rem] p-5">
             <button
               onClick={() => setShareFoodDna(!shareFoodDna)}
               className="w-full flex items-center justify-between"
             >
               <div className="flex items-center gap-3">
                 {shareFoodDna ? (
-                  <Eye className="w-5 h-5 text-emerald-600" />
+                  <Eye className="w-5 h-5 text-nm-signature" />
                 ) : (
-                  <EyeOff className="w-5 h-5 text-gray-400" />
+                  <EyeOff className="w-5 h-5 text-nm-text/30" />
                 )}
                 <div className="text-left">
-                  <p className="font-medium text-gray-900">Share Food DNA with friends</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="font-bold text-nm-text">Share Food DNA with friends</p>
+                  <p className="text-sm text-nm-text/60">
                     Let friends see your food preferences for better group dining
                   </p>
                 </div>
               </div>
               <div
                 className={`w-12 h-7 rounded-full transition-colors flex items-center px-1 ${
-                  shareFoodDna ? 'bg-emerald-500' : 'bg-gray-300'
+                  shareFoodDna ? 'bg-nm-signature' : 'bg-nm-surface-high'
                 }`}
               >
                 <div
@@ -224,10 +225,10 @@ export function ProfileSetupModal({
           <button
             onClick={handleSave}
             disabled={!username || !displayName || !!usernameError || saving}
-            className={`w-full py-4 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 ${
+            className={`w-full py-4 font-bold rounded-full transition-all flex items-center justify-center gap-2 active:scale-95 ${
               !username || !displayName || !!usernameError || saving
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                ? 'bg-nm-surface-high text-nm-text/30 cursor-not-allowed'
+                : 'bg-gradient-to-br from-nm-signature to-nm-signature-light text-white shadow-nm-float'
             }`}
           >
             {saving ? (

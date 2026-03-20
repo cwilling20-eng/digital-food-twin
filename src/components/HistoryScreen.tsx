@@ -57,7 +57,7 @@ export function HistoryScreen({ userId }: HistoryScreenProps) {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Clock className="w-6 h-6 text-emerald-600" />
+              <Clock className="w-6 h-6 text-nm-signature" />
               Meal History
             </h1>
             <p className="text-gray-500 text-sm mt-1">Your logged meals and feedback</p>
@@ -75,7 +75,7 @@ export function HistoryScreen({ userId }: HistoryScreenProps) {
       <div className="px-4 space-y-3">
         {loading && mealLogs.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20">
-            <Loader2 className="w-8 h-8 text-emerald-500 animate-spin mb-2" />
+            <Loader2 className="w-8 h-8 text-nm-bg0 animate-spin mb-2" />
             <p className="text-gray-400">Loading your meal history...</p>
           </div>
         ) : mealLogs.length === 0 ? (

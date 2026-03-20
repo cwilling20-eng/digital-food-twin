@@ -26,7 +26,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
 
       <div className="px-4 mt-6">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-3">
+          <div className="w-16 h-16 bg-gradient-to-br from-nm-signature to-nm-signature rounded-2xl flex items-center justify-center shadow-lg shadow-nm-bg0/20 mb-3">
             <span className="text-2xl font-bold text-white">F</span>
           </div>
           <h2 className="text-lg font-bold text-gray-900">Digital Food Twin</h2>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffefec",
+              "surface-container": "#e8e5ff",
+              "primary-fixed-dim": "#f56364",
+              "secondary-fixed": "#ffc789",
+              "on-tertiary-fixed": "#004d49",
+              "inverse-on-surface": "#9c9ab4",
+              "tertiary-dim": "#005a55",
+              "on-tertiary-container": "#00625c",
+              "secondary-fixed-dim": "#ffb55b",
+              "primary-container": "#ff7574",
+              "primary-fixed": "#ff7574",
+              "on-tertiary": "#befff8",
+              "on-surface-variant": "#5a5971",
+              "tertiary": "#006761",
+              "secondary": "#835000",
+              "primary": "#aa2c32",
+              "on-secondary-fixed": "#4d2d00",
+              "on-secondary": "#fff0e4",
+              "outline": "#75748d",
+              "surface": "#f8f5ff",
+              "surface-bright": "#f8f5ff",
+              "surface-dim": "#d3d1f8",
+              "tertiary-fixed-dim": "#76f0e7",
+              "inverse-primary": "#ff6b6b",
+              "tertiary-container": "#85fff5",
+              "on-surface": "#2d2d42",
+              "surface-container-low": "#f2efff",
+              "on-error-container": "#520c00",
+              "on-primary": "#ffefee",
+              "on-secondary-fixed-variant": "#744600",
+              "surface-tint": "#aa2c32",
+              "on-primary-fixed": "#000000",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-highest": "#dbd9ff",
+              "on-secondary-container": "#673e00",
+              "background": "#f8f5ff",
+              "error": "#b02500",
+              "on-background": "#2d2d42",
+              "on-primary-container": "#4e0009",
+              "inverse-surface": "#0c0c1f",
+              "secondary-container": "#ffc789",
+              "primary-dim": "#992027",
+              "surface-variant": "#dbd9ff",
+              "error-container": "#f95630",
+              "on-primary-fixed-variant": "#60000d",
+              "surface-container-high": "#e2dfff",
+              "secondary-dim": "#734500",
+              "error-dim": "#b92902",
+              "tertiary-fixed": "#85fff5",
+              "on-tertiary-fixed-variant": "#006d67",
+              "outline-variant": "#acaac5"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#FFFAF5] text-[#1A1A2E] min-h-screen pb-32">
+<!-- Top AppBar (from JSON) -->
+<nav class="sticky top-0 z-50 bg-[#FFFAF5]/80 dark:bg-slate-900/80 backdrop-blur-[24px] shadow-[0_40px_60px_-15px_rgba(170,44,50,0.06)] flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border-2 border-primary-container/20">
+<img class="w-full h-full object-cover" data-alt="User profile avatar smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw5Vyua5ziD8tqQflQPGmcehfx-KLAGTvy7_DupieHkbMQC3Gdzmo235oaMY92fnj6q7aBgEIg7mlkNS981OIjp-tY34r9G0D2-b5tMK8E6Ig-UZ1JDLJ9LgKBrpLfldtQNOjrUe8CUBjdaj3RMPp1PwTLH__sdrWuvt_KQChSl2RIC8p3a6sHeBKA4O9RI5uWe478V19pswkZA51klrIo77NbLRC_2HOcibWq54ktvKw7XJ_uD5KN-A_LIM0wGQZ4xFTrIkyORLq7"/>
+</div>
+<span class="text-2xl font-black text-[#AA2C32] dark:text-[#FF7574] tracking-tighter">NomMigo</span>
+</div>
+<button class="w-12 h-12 rounded-full flex items-center justify-center bg-surface-container-low text-[#AA2C32] hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</nav>
+<main class="max-w-xl mx-auto px-6 pt-8">
+<!-- Header -->
+<header class="mb-10">
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-2">Dining Buddies</h1>
+<p class="text-lg text-on-surface-variant/80 font-medium">See what your flavor circle is devouring today</p>
+</header>
+<!-- Featured Plan Card -->
+<section class="mb-12">
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#FF6B6B] to-[#FF8E8E] p-8 text-white shadow-[0_30px_60px_-12px_rgba(255,107,107,0.3)]">
+<div class="relative z-10">
+<h2 class="text-3xl font-bold mb-2 tracking-tight">Plan a group dinner</h2>
+<p class="text-white/90 mb-6 font-medium">Coordinate with your matches seamlessly.</p>
+<div class="flex items-center -space-x-4 mb-8">
+<img class="w-12 h-12 rounded-full border-4 border-[#FF6B6B] object-cover" data-alt="Friend avatar female" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf90P9ZKk2RjZuH7oB5dZfSAUSFSNDcRWQkcKZt4xMNtHAnviPetYAVGJGMV_BW9-xmN-_7po7yNZh8wVdCn_5qEVlmmKvqCBGa4_BhDTahXTaic-oYYfboZPKYXK2fhkwiAS61VKT0mbYVnzdPcYxFllE9P8e0-RVW7puCKBY2kY1RJkDyzTHhg1CldhfdOhIHNpIktSLZ6V3SpH4vU2Z2dvUc9-mIiXHSMsC2Z7nDjhAA4ePK-rpk2brALIZHwxIsS1sohTVnDBl"/>
+<img class="w-12 h-12 rounded-full border-4 border-[#FF6B6B] object-cover" data-alt="Friend avatar male" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq3hbG7mKSQhlMgTDbckA3f_3lxfCYVkhhQKaHjljiMYkwi_Y-kdEWR4Ur1e-YvHx-tosQdioj4t4Shb9RiuvVFizVgPK5ZHiwGGdyrmlcJBSMk_ST3O4b5hVMJ6zqKecWGB0OKanre9q_1_TNB7KM7iazh5mhuNAZN4fuYka2NtZE5FpeZdO4uTuxH841EWV2i7ECC3kML8kp2TZKkiTm6yK7aw9vJqrJ0taaB_FB0lQltwMIdCB2OT9k9ieKCpUdHaMFq5L1HYE_"/>
+<img class="w-12 h-12 rounded-full border-4 border-[#FF6B6B] object-cover" data-alt="Friend avatar male 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxy5mLlFd7NYVDkPYq4O7wB7Z2CnzkBb6IA_WWObqbuMR7MHyPX0ugUYWTDCSxaP63gNOIrPwoUp9UorM53PIPzfwYTRMno6ByX5BJ9YC74Pm2LLSxK3_1sTgNaxL0pkQEZfxLdtXqblGigxetCy9YwzkoJgpU44rx_-9NbRKZq2V0WAi6uegPLVgVOq83ehyE48l2ssrc-qxVs2W_55n8c62jRVDbCxbLq_oN913jMxVc5_2UdnWBNpU7v3tKr93n93sEndiDLIlO"/>
+<div class="w-12 h-12 rounded-full border-4 border-[#FF6B6B] bg-white/20 backdrop-blur-md flex items-center justify-center text-sm font-bold">+12</div>
+</div>
+<button class="bg-white text-[#AA2C32] px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl">
+                        Find the Perfect Spot
+                    </button>
+</div>
+<!-- Abstract Decorative Shapes -->
+<div class="absolute -right-8 -top-8 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute -left-12 -bottom-12 w-64 h-64 bg-secondary-container/20 rounded-full blur-2xl"></div>
+</div>
+</section>
+<!-- Social Feed -->
+<div class="space-y-12">
+<!-- Post 1 -->
+<article class="group">
+<div class="flex items-center justify-between mb-4 px-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Friend profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHPvG6ZJooQXUdwKLJStv-TyHaud8I0f-Qn6BCPFDp46w-oygAtPsOzcbNeceyxjY6QOAAcG9hsiorA_2b5_SQdJkbNiQN8c_l8PdEkuvoWoe7BTSV2zEOG9OBMjeYX3RlgOugD2jvwTm8brEjViYoO4QfNCXCT-2l8XJLZf9gYo9r84Izfd_uG3E-sY6l3IGGWJFCC6AeWSyaVjNU8QWjgG_2QUUM1sJWtjCL3US4jmIBfTwTV5UUU1OKa2A2adfsHRgO4aQku9s0"/>
+</div>
+<div>
+<h3 class="font-bold text-lg">Elena Vance</h3>
+<p class="text-xs text-on-surface-variant font-bold uppercase tracking-widest">2 hours ago</p>
+</div>
+</div>
+<div class="bg-secondary-container px-4 py-2 rounded-full flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#835000] text-sm" data-icon="dna" style="font-variation-settings: 'wght' 700;">genetics</span>
+<span class="text-[#835000] font-black text-sm">94% MATCH</span>
+</div>
+</div>
+<div class="bg-[#FFF0E5] rounded-xl p-3 shadow-sm group-hover:shadow-md transition-shadow">
+<div class="relative aspect-square rounded-lg overflow-hidden mb-6">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="Truffle pasta with parmesan" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyZ0CcRKbhzGg6ipMzyv97jEIiVJuLmGauRpL_Rb3FeMT65kc3G8ewtxnyXPgI655X3QgNIsrSjdzDZLO8L1Tdq19aZO6OVd70X0A1fwsi38xLsN463XxDGr9gWSwkq5pU4G3NrulEgHs8JZaPM0M9ipRXruLx6PAlCSA9pWkCcSNcQtlLYx6sVbs7Fm1yQktE31NwRX6KORH0BwkOCxVdfDJtzo5mBzPDbL-AKhmZDpUsD4FsioSvuIEevbdOSixf1YTXlWTEefzr"/>
+<div class="absolute bottom-4 left-4 right-4 bg-white/80 backdrop-blur-xl p-4 rounded-lg shadow-xl">
+<h4 class="text-xl font-bold text-on-surface">Wild Mushroom Truffle Tagliatelle</h4>
+<p class="text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="restaurant">restaurant</span>
+                                Osteria Francescana
+                            </p>
+</div>
+</div>
+<div class="px-4 pb-4">
+<p class="text-on-surface leading-relaxed font-medium mb-6">The earthy aroma hit me before the plate even reached the table. Seriously the best pasta I've had this year. Anyone want to go back next Tuesday? 🍝✨</p>
+<div class="flex items-center justify-between border-t border-secondary-container/30 pt-4">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 group/btn">
+<span class="material-symbols-outlined text-[#FF6B6B] group-hover/btn:scale-125 transition-transform" data-icon="mood" style="font-variation-settings: 'FILL' 1;">mood</span>
+<span class="font-bold text-sm">28</span>
+</button>
+<button class="flex items-center gap-2 group/btn">
+<span class="material-symbols-outlined text-slate-400 group-hover/btn:text-slate-600 transition-colors" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-bold text-sm">12</span>
+</button>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined text-slate-400" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Post 2 -->
+<article class="group">
+<div class="flex items-center justify-between mb-4 px-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Friend profile male" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgTiLHJjffMQDtUdfFUJ5jXjye1VP-CGQf4ZO07xK_OX5Lxdb0uGG72vxpEr54NpLzhtXTPozDDWBK7rDmSoNLC8Pp3po0OE_iP9cH0PElc2gt4shumAyfUQr7MpCP1Nu9F8DZrHXE3WwcQeNFmJJUcAmQBNw6N67v45Qg4i_i9UQLP2y1PWzAThYAsEjj2PvboOIKUYION0Yw2vomQn8DEhEXoJdpqP_hFFslVOiIkBULzoRjOOV_ORWMlmVdAAeJXtoij6K0qxge"/>
+</div>
+<div>
+<h3 class="font-bold text-lg">Marcus Chen</h3>
+<p class="text-xs text-on-surface-variant font-bold uppercase tracking-widest">5 hours ago</p>
+</div>
+</div>
+<div class="bg-secondary-container px-4 py-2 rounded-full flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#835000] text-sm" data-icon="dna" style="font-variation-settings: 'wght' 700;">genetics</span>
+<span class="text-[#835000] font-black text-sm">82% MATCH</span>
+</div>
+</div>
+<div class="bg-[#FFF0E5] rounded-xl p-3 shadow-sm group-hover:shadow-md transition-shadow">
+<div class="relative aspect-[4/5] rounded-lg overflow-hidden mb-6">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="Artisanal cocktail with garnish" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnYOBh6A_PeR_vcOSd3bs-tFohFsNZ-YQaYb824crUKA9-VI1SuBDtbuT1G0Z6fK8Cvp2-OOB_oNMIsxaVVzgTicGtuEatnweSZwV7QGDI7Dgv6a6q0KYvhQQ_NyzCNd4Espd3BgFIvCUAaselVj3E9fcJsTXSvwv-Pay6bUeNuSFHEr7w927PW71iUu1tiRkUL_rpLkfU6OxhmDjk8NhSMkhpljmygu1lK36OrxTp8NkzfMqdcKS1tZFhpD9M3cR7Y_DbYeIpqkRo"/>
+<div class="absolute bottom-4 left-4 right-4 bg-white/80 backdrop-blur-xl p-4 rounded-lg shadow-xl">
+<h4 class="text-xl font-bold text-on-surface">Smoked Yuzu Highball</h4>
+<p class="text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="local_bar">local_bar</span>
+                                Neon Tokyo Lounge
+                            </p>
+</div>
+</div>
+<div class="px-4 pb-4">
+<p class="text-on-surface leading-relaxed font-medium mb-6">The presentation was 10/10 but the flavor was 11/10. Subtle smoke with a citrus kick that perfectly cleanses the palate. Their happy hour starts at 4pm! 🍸</p>
+<div class="flex items-center justify-between border-t border-secondary-container/30 pt-4">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 group/btn">
+<span class="material-symbols-outlined text-[#FF6B6B]" data-icon="mood" style="font-variation-settings: 'FILL' 1;">mood</span>
+<span class="font-bold text-sm">45</span>
+</button>
+<button class="flex items-center gap-2 group/btn">
+<span class="material-symbols-outlined text-slate-400" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-bold text-sm">8</span>
+</button>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary-container transition-colors">
+<span class="material-symbols-outlined text-slate-400" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+</div>
+</main>
+<!-- Floating NomMigo Smiley Button -->
+<button class="fixed bottom-28 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] text-white flex items-center justify-center shadow-[0_20px_40px_rgba(255,107,107,0.4)] hover:scale-110 active:scale-90 transition-all z-50">
+<span class="material-symbols-outlined text-3xl" data-icon="mood" style="font-variation-settings: 'FILL' 1;">mood</span>
+</button>
+<!-- Bottom Navigation Bar (from JSON) -->
+<div class="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center px-4 pb-8">
+<div class="bg-[#FFFAF5]/80 backdrop-blur-[20px] shadow-[0_20px_50px_rgba(255,107,107,0.15)] rounded-full flex justify-around items-center w-[90%] max-w-md mx-auto p-2">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:scale-105 transition-transform active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-[10px] uppercase tracking-widest mt-1">Home</span>
+</a>
+<!-- Meal Log -->
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:scale-105 transition-transform active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-[10px] uppercase tracking-widest mt-1">Meals</span>
+</a>
+<!-- Social (Active) -->
+<a class="flex flex-col items-center justify-center bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] text-white rounded-full p-4 scale-110 shadow-lg active:scale-90 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-[10px] uppercase tracking-widest mt-1">Social</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-slate-400 p-2 hover:scale-105 transition-transform active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-[10px] uppercase tracking-widest mt-1">Profile</span>
+</a>
+</div>
+</div>
+</body></html>

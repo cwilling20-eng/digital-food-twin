@@ -5,6 +5,7 @@ import {
   ChevronDown, ToggleLeft, ToggleRight, Target
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
+import { ProgressBar } from '../ui/ProgressBar';
 import type { NutritionGoals } from '../../types';
 import {
   BodyMetrics, calculateGoals, calculateAge, WEEKLY_GOAL_OPTIONS,
@@ -98,25 +99,25 @@ export function MyGoalsScreen({ onSave, onBack }: MyGoalsScreenProps) {
   const activityLabel = ACTIVITY_OPTIONS.find(o => o.value === metrics.activityLevel)?.label || 'Select...';
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
-      <div className="bg-white sticky top-0 z-30 shadow-sm">
-        <div className="px-4 pt-12 pb-4">
+    <div className="min-h-screen bg-nm-bg pb-32">
+      <div className="bg-nm-bg/80 backdrop-blur-xl sticky top-0 z-30">
+        <div className="px-6 pt-12 pb-4">
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-nm-surface transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
+              <ArrowLeft className="w-5 h-5 text-nm-text" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">My Goals</h1>
-              <p className="text-xs text-gray-500 mt-0.5">Body metrics & nutrition targets</p>
+              <h1 className="text-xl font-bold text-nm-text">My Goals</h1>
+              <p className="text-nm-label-md text-nm-text/40">Body metrics & nutrition targets</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-4 mt-4 space-y-5">
+      <div className="px-6 mt-4 space-y-5">
         <BodyMetricsSection
           metrics={metrics}
           age={age}
@@ -153,7 +154,7 @@ export function MyGoalsScreen({ onSave, onBack }: MyGoalsScreenProps) {
         />
 
         {saveStatus === 'error' && saveError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
+          <div className="bg-nm-signature/10 text-nm-signature text-sm px-5 py-3 rounded-[2rem]">
             {saveError}
           </div>
         )}
@@ -162,14 +163,14 @@ export function MyGoalsScreen({ onSave, onBack }: MyGoalsScreenProps) {
           <button
             onClick={handleSave}
             disabled={saveStatus === 'saving'}
-            className={`w-full py-4 rounded-2xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+            className={`w-full py-4 rounded-full font-bold transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 ${
               saveStatus === 'saved'
-                ? 'bg-emerald-500 text-white'
+                ? 'bg-nm-success text-white'
                 : saveStatus === 'error'
-                  ? 'bg-red-500 text-white'
+                  ? 'bg-nm-signature text-white'
                   : saveStatus === 'saving'
-                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 active:scale-[0.98]'
+                    ? 'bg-nm-surface-high text-nm-text/40 cursor-not-allowed'
+                    : 'bg-gradient-to-br from-nm-signature to-nm-signature-light text-white shadow-nm-float'
             }`}
           >
             {saveStatus === 'saving' && 'Saving...'}
@@ -187,7 +188,7 @@ function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }
   return (
     <div className="flex items-center gap-2 mb-3">
       {icon}
-      <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">{title}</h2>
+      <h2 className="text-nm-label-md text-nm-text/60 uppercase tracking-widest">{title}</h2>
     </div>
   );
 }
@@ -203,26 +204,21 @@ function BodyMetricsSection({
   onUpdate: <K extends keyof BodyMetrics>(key: K, value: BodyMetrics[K]) => void;
 }) {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-      <SectionHeader icon={<Scale className="w-4 h-4 text-gray-500" />} title="Body Metrics" />
+    <div className="bg-nm-surface-lowest rounded-[2rem] p-6 shadow-nm-float">
+      <SectionHeader icon={<Scale className="w-4 h-4 text-nm-text/40" />} title="Body Metrics" />
 
       {metrics.startingWeight && metrics.currentWeight && metrics.goalWeight && (
-        <div className="mb-5 p-4 bg-gray-50 rounded-xl">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-gray-500">Progress to goal</span>
-            <span className="text-xs font-bold text-emerald-600">
+        <div className="mb-5 p-5 bg-nm-surface rounded-[1.5rem]">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-nm-label-md text-nm-text/40 uppercase tracking-wider">Progress to goal</span>
+            <span className="text-nm-label-md font-bold text-nm-signature">
               {goalReached ? 'Goal reached!' : `${weightToGo?.toFixed(1)} lbs to go`}
             </span>
           </div>
-          <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-500"
-              style={{ width: `${weightProgress}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-[10px] text-gray-400">{metrics.startingWeight} lbs</span>
-            <span className="text-[10px] text-gray-400">{metrics.goalWeight} lbs</span>
+          <ProgressBar percentage={weightProgress} className="h-3" />
+          <div className="flex justify-between mt-2">
+            <span className="text-nm-label-md text-nm-text/40">{metrics.startingWeight} lbs</span>
+            <span className="text-nm-label-md text-nm-text/40">{metrics.goalWeight} lbs</span>
           </div>
         </div>
       )}
@@ -253,7 +249,7 @@ function BodyMetricsSection({
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
-          <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
+          <label className="text-nm-label-md text-nm-text/60 uppercase tracking-widest mb-2 block">
             <Ruler className="w-3 h-3 inline mr-1 opacity-60" />Height
           </label>
           <div className="flex gap-2">
@@ -263,9 +259,9 @@ function BodyMetricsSection({
                 value={metrics.heightFeet ?? ''}
                 onChange={(e) => onUpdate('heightFeet', e.target.value ? Number(e.target.value) : null)}
                 placeholder="5"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent pr-8"
+                className="w-full px-4 py-3 bg-nm-surface-high rounded-full text-sm text-nm-text focus:outline-none focus:ring-2 focus:ring-nm-signature/40 focus:bg-nm-surface-lowest pr-8"
               />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">ft</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-nm-label-md text-nm-text/40">ft</span>
             </div>
             <div className="flex-1 relative">
               <input
@@ -275,30 +271,30 @@ function BodyMetricsSection({
                 value={metrics.heightInches ?? ''}
                 onChange={(e) => onUpdate('heightInches', e.target.value ? Number(e.target.value) : null)}
                 placeholder="10"
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent pr-8"
+                className="w-full px-4 py-3 bg-nm-surface-high rounded-full text-sm text-nm-text focus:outline-none focus:ring-2 focus:ring-nm-signature/40 focus:bg-nm-surface-lowest pr-8"
               />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">in</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-nm-label-md text-nm-text/40">in</span>
             </div>
           </div>
         </div>
         <div>
-          <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
+          <label className="text-nm-label-md text-nm-text/60 uppercase tracking-widest mb-2 block">
             <Calendar className="w-3 h-3 inline mr-1 opacity-60" />Birth Date
           </label>
           <input
             type="date"
             value={metrics.birthDate}
             onChange={(e) => onUpdate('birthDate', e.target.value)}
-            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-nm-surface-high rounded-full text-sm text-nm-text focus:outline-none focus:ring-2 focus:ring-nm-signature/40 focus:bg-nm-surface-lowest"
           />
           {age !== null && (
-            <span className="text-[10px] text-gray-400 mt-1 block">{age} years old</span>
+            <span className="text-nm-label-md text-nm-text/40 mt-1 block">{age} years old</span>
           )}
         </div>
       </div>
 
       <div>
-        <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
+        <label className="text-nm-label-md text-nm-text/60 uppercase tracking-widest mb-2 block">
           <User className="w-3 h-3 inline mr-1 opacity-60" />Gender
         </label>
         <div className="flex gap-2">
@@ -306,10 +302,10 @@ function BodyMetricsSection({
             <button
               key={g}
               onClick={() => onUpdate('gender', g)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 py-3 rounded-full text-sm font-bold transition-all active:scale-95 ${
                 metrics.gender === g
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-gray-50 text-gray-600 border border-gray-200 hover:border-gray-300'
+                  ? 'bg-nm-signature text-white shadow-nm-float'
+                  : 'bg-nm-surface-high text-nm-text hover:bg-nm-surface-highest'
               }`}
             >
               {g.charAt(0).toUpperCase() + g.slice(1)}
@@ -336,26 +332,26 @@ function WeightPlanSection({
   const suggestedLabel = calculated ? WEEKLY_GOAL_OPTIONS.find(o => o.value === calculated.suggestedWeeklyGoal)?.label : null;
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-      <SectionHeader icon={<TrendingDown className="w-4 h-4 text-gray-500" />} title="Weight Plan" />
+    <div className="bg-nm-surface-lowest rounded-[2rem] p-6 shadow-nm-float">
+      <SectionHeader icon={<TrendingDown className="w-4 h-4 text-nm-text/40" />} title="Weight Plan" />
 
       {showWeightContext && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-xl">
+        <div className="mb-4 p-4 bg-nm-surface rounded-[1.5rem]">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-medium text-blue-900">
+            <span className="text-nm-label-md font-bold text-nm-text">
               {calculated!.weightDifference > 0
                 ? `Goal: Gain ${Math.abs(calculated!.weightDifference).toFixed(1)} lbs`
                 : `Goal: Lose ${Math.abs(calculated!.weightDifference).toFixed(1)} lbs`
               }
             </span>
             {calculated!.weeksToGoal && (
-              <span className="text-xs text-blue-600">
+              <span className="text-nm-label-md text-nm-text/60">
                 ~{Math.ceil(calculated!.weeksToGoal)} weeks
               </span>
             )}
           </div>
           {suggestedLabel && metrics.weeklyWeightGoal !== calculated!.suggestedWeeklyGoal && (
-            <p className="text-[10px] text-blue-600">
+            <p className="text-nm-label-md text-nm-signature">
               Suggested rate: {suggestedLabel}
             </p>
           )}
@@ -364,29 +360,29 @@ function WeightPlanSection({
 
       <div className="space-y-4">
         <div className="relative">
-          <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
+          <label className="text-nm-label-md text-nm-text/60 uppercase tracking-widest mb-2 block">
             Weekly Rate
           </label>
-          <p className="text-[10px] text-gray-400 mb-2">Direction is determined by your goal weight</p>
+          <p className="text-nm-label-md text-nm-text/30 mb-2">Direction is determined by your goal weight</p>
           <button
             onClick={() => setOpenDropdown(openDropdown === 'weekly' ? null : 'weekly')}
-            className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 hover:border-gray-300 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3.5 bg-nm-surface-high rounded-full text-sm text-nm-text hover:bg-nm-surface-highest transition-colors"
           >
             <span>{weeklyLabel}</span>
-            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'weekly' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-nm-text/40 transition-transform ${openDropdown === 'weekly' ? 'rotate-180' : ''}`} />
           </button>
           {openDropdown === 'weekly' && (
-            <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+            <div className="absolute top-full left-0 right-0 z-20 mt-2 bg-nm-surface-lowest rounded-[1.5rem] shadow-nm-float overflow-hidden">
               {WEEKLY_GOAL_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => { onUpdate('weeklyWeightGoal', opt.value); setOpenDropdown(null); }}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${
-                    metrics.weeklyWeightGoal === opt.value ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700'
+                  className={`w-full flex items-center justify-between px-5 py-3.5 text-sm hover:bg-nm-surface transition-colors ${
+                    metrics.weeklyWeightGoal === opt.value ? 'bg-nm-surface text-nm-text' : 'text-nm-text/80'
                   }`}
                 >
-                  <span className="font-medium">{opt.label}</span>
-                  {opt.sublabel && <span className="text-xs text-gray-400">{opt.sublabel}</span>}
+                  <span className="font-bold">{opt.label}</span>
+                  {opt.sublabel && <span className="text-nm-label-md text-nm-text/40">{opt.sublabel}</span>}
                 </button>
               ))}
             </div>
@@ -394,30 +390,30 @@ function WeightPlanSection({
         </div>
 
         <div className="relative">
-          <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">
+          <label className="text-nm-label-md text-nm-text/60 uppercase tracking-widest mb-2 block">
             <Activity className="w-3 h-3 inline mr-1 opacity-60" />Activity Level
           </label>
           <button
             onClick={() => setOpenDropdown(openDropdown === 'activity' ? null : 'activity')}
-            className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 hover:border-gray-300 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3.5 bg-nm-surface-high rounded-full text-sm text-nm-text hover:bg-nm-surface-highest transition-colors"
           >
             <span>{activityLabel}</span>
-            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === 'activity' ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 text-nm-text/40 transition-transform ${openDropdown === 'activity' ? 'rotate-180' : ''}`} />
           </button>
           {openDropdown === 'activity' && (
-            <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+            <div className="absolute top-full left-0 right-0 z-20 mt-2 bg-nm-surface-lowest rounded-[1.5rem] shadow-nm-float overflow-hidden">
               {ACTIVITY_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => { onUpdate('activityLevel', opt.value); setOpenDropdown(null); }}
-                  className={`w-full flex flex-col px-4 py-3 text-sm hover:bg-gray-50 transition-colors text-left ${
-                    metrics.activityLevel === opt.value ? 'bg-emerald-50' : ''
+                  className={`w-full flex flex-col px-5 py-3.5 text-sm hover:bg-nm-surface transition-colors text-left ${
+                    metrics.activityLevel === opt.value ? 'bg-nm-surface' : ''
                   }`}
                 >
-                  <span className={`font-medium ${metrics.activityLevel === opt.value ? 'text-emerald-700' : 'text-gray-700'}`}>
+                  <span className={`font-bold ${metrics.activityLevel === opt.value ? 'text-nm-text' : 'text-nm-text/80'}`}>
                     {opt.label}
                   </span>
-                  <span className="text-xs text-gray-400">{opt.sublabel}</span>
+                  <span className="text-nm-label-md text-nm-text/40">{opt.sublabel}</span>
                 </button>
               ))}
             </div>
@@ -431,9 +427,9 @@ function WeightPlanSection({
 function CalculatedSection({ calculated }: { calculated: ReturnType<typeof calculateGoals> }) {
   if (!calculated) {
     return (
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 border border-gray-200 border-dashed">
-        <SectionHeader icon={<Target className="w-4 h-4 text-gray-400" />} title="Recommendations" />
-        <p className="text-sm text-gray-400">
+      <div className="bg-nm-surface rounded-[2rem] p-6">
+        <SectionHeader icon={<Target className="w-4 h-4 text-nm-text/30" />} title="Recommendations" />
+        <p className="text-sm text-nm-text/40">
           Fill in your body metrics above to see personalized calorie and macro recommendations.
         </p>
       </div>
@@ -441,26 +437,26 @@ function CalculatedSection({ calculated }: { calculated: ReturnType<typeof calcu
   }
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100">
-      <SectionHeader icon={<Target className="w-4 h-4 text-emerald-600" />} title="Recommendations" />
+    <div className="bg-nm-surface-lowest rounded-[2rem] p-6 shadow-nm-float">
+      <SectionHeader icon={<Target className="w-4 h-4 text-nm-signature" />} title="Recommendations" />
       <div className="grid grid-cols-2 gap-3">
-        <RecommendationBadge label="Calories" value={`${calculated.calorieGoal.toLocaleString()}`} unit="kcal" color="text-orange-600" bg="bg-orange-50" />
-        <RecommendationBadge label="Protein" value={`${calculated.proteinGoal}`} unit="g" color="text-blue-600" bg="bg-blue-50" />
-        <RecommendationBadge label="Carbs" value={`${calculated.carbsGoal}`} unit="g" color="text-amber-600" bg="bg-amber-50" />
-        <RecommendationBadge label="Fat" value={`${calculated.fatGoal}`} unit="g" color="text-rose-600" bg="bg-rose-50" />
+        <RecommendationBadge label="Calories" value={`${calculated.calorieGoal.toLocaleString()}`} unit="kcal" />
+        <RecommendationBadge label="Protein" value={`${calculated.proteinGoal}`} unit="g" />
+        <RecommendationBadge label="Carbs" value={`${calculated.carbsGoal}`} unit="g" />
+        <RecommendationBadge label="Fat" value={`${calculated.fatGoal}`} unit="g" />
       </div>
-      <p className="text-[10px] text-emerald-600/60 mt-3">Based on Mifflin-St Jeor formula with 30/40/30 macro split</p>
+      <p className="text-nm-label-md text-nm-text/30 mt-3">Based on Mifflin-St Jeor formula with 30/40/30 macro split</p>
     </div>
   );
 }
 
-function RecommendationBadge({ label, value, unit, color, bg }: { label: string; value: string; unit: string; color: string; bg: string }) {
+function RecommendationBadge({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
-    <div className={`${bg} rounded-xl px-4 py-3 flex items-baseline justify-between`}>
-      <span className="text-xs font-medium text-gray-600">{label}</span>
+    <div className="bg-nm-surface rounded-[1.5rem] px-4 py-4 flex items-baseline justify-between">
+      <span className="text-nm-label-md text-nm-text/60 uppercase tracking-wider">{label}</span>
       <div className="flex items-baseline gap-0.5">
-        <span className={`text-lg font-bold ${color}`}>{value}</span>
-        <span className="text-[10px] text-gray-400">{unit}</span>
+        <span className="text-3xl font-bold text-nm-signature">{value}</span>
+        <span className="text-nm-label-md text-nm-text/40">{unit}</span>
       </div>
     </div>
   );
@@ -476,59 +472,59 @@ function GoalModeSection({
   onToggle: () => void;
   onUpdateGoal: (key: keyof NutritionGoals, value: number) => void;
 }) {
-  const goalFields: { key: keyof NutritionGoals; label: string; unit: string; icon: React.ReactNode; color: string; bgColor: string; min: number; max: number; step: number }[] = [
-    { key: 'calorieGoal', label: 'Calories', unit: 'kcal', icon: <Flame className="w-4 h-4" />, color: 'text-orange-600', bgColor: 'bg-orange-50', min: 800, max: 5000, step: 50 },
-    { key: 'proteinGoal', label: 'Protein', unit: 'g', icon: <Beef className="w-4 h-4" />, color: 'text-blue-600', bgColor: 'bg-blue-50', min: 20, max: 400, step: 5 },
-    { key: 'carbsGoal', label: 'Carbs', unit: 'g', icon: <Wheat className="w-4 h-4" />, color: 'text-amber-600', bgColor: 'bg-amber-50', min: 20, max: 600, step: 5 },
-    { key: 'fatGoal', label: 'Fat', unit: 'g', icon: <Droplets className="w-4 h-4" />, color: 'text-rose-600', bgColor: 'bg-rose-50', min: 10, max: 250, step: 5 },
+  const goalFields: { key: keyof NutritionGoals; label: string; unit: string; icon: React.ReactNode; min: number; max: number; step: number }[] = [
+    { key: 'calorieGoal', label: 'Calories', unit: 'kcal', icon: <Flame className="w-4 h-4" />, min: 800, max: 5000, step: 50 },
+    { key: 'proteinGoal', label: 'Protein', unit: 'g', icon: <Beef className="w-4 h-4" />, min: 20, max: 400, step: 5 },
+    { key: 'carbsGoal', label: 'Carbs', unit: 'g', icon: <Wheat className="w-4 h-4" />, min: 20, max: 600, step: 5 },
+    { key: 'fatGoal', label: 'Fat', unit: 'g', icon: <Droplets className="w-4 h-4" />, min: 10, max: 250, step: 5 },
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div className="bg-nm-surface-lowest rounded-[2rem] p-6 shadow-nm-float">
       <div className="flex items-center justify-between mb-4">
-        <SectionHeader icon={<Flame className="w-4 h-4 text-gray-500" />} title="Daily Targets" />
+        <SectionHeader icon={<Flame className="w-4 h-4 text-nm-text/40" />} title="Daily Targets" />
         <button onClick={onToggle} className="flex items-center gap-1.5 text-sm">
           {metrics.useCustomGoals ? (
-            <ToggleRight className="w-6 h-6 text-emerald-500" />
+            <ToggleRight className="w-6 h-6 text-nm-signature" />
           ) : (
-            <ToggleLeft className="w-6 h-6 text-gray-400" />
+            <ToggleLeft className="w-6 h-6 text-nm-text/30" />
           )}
-          <span className={`text-xs font-medium ${metrics.useCustomGoals ? 'text-emerald-600' : 'text-gray-400'}`}>
+          <span className={`text-nm-label-md font-bold ${metrics.useCustomGoals ? 'text-nm-signature' : 'text-nm-text/30'}`}>
             Custom
           </span>
         </button>
       </div>
 
       {!metrics.useCustomGoals && calculated && (
-        <p className="text-xs text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg mb-4">
+        <p className="text-nm-label-md text-nm-signature bg-nm-signature/10 px-4 py-2.5 rounded-full mb-4">
           Using calculated recommendations based on your body metrics.
         </p>
       )}
 
       {!metrics.useCustomGoals && !calculated && (
-        <p className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg mb-4">
+        <p className="text-nm-label-md text-nm-accent bg-nm-accent/10 px-4 py-2.5 rounded-full mb-4">
           Complete your body metrics above to get personalized targets.
         </p>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {goalFields.map((field) => {
           const value = activeGoals[field.key];
           const isEditable = metrics.useCustomGoals;
           const recommendedValue = calculated ? calculated[field.key as keyof typeof calculated] : null;
 
           return (
-            <div key={field.key} className={`${!isEditable ? 'opacity-80' : ''}`}>
+            <div key={field.key} className={`${!isEditable ? 'opacity-70' : ''}`}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${field.bgColor} ${field.color}`}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-nm-surface text-nm-signature">
                     {field.icon}
                   </div>
-                  <span className="text-sm font-medium text-gray-900">{field.label}</span>
+                  <span className="text-sm font-bold text-nm-text">{field.label}</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-bold text-gray-900">{value}</span>
-                  <span className="text-xs text-gray-400">{field.unit}</span>
+                  <span className="text-lg font-bold text-nm-text">{value}</span>
+                  <span className="text-nm-label-md text-nm-text/40">{field.unit}</span>
                 </div>
               </div>
               {isEditable && (
@@ -539,11 +535,11 @@ function GoalModeSection({
                   step={field.step}
                   value={customGoals[field.key]}
                   onChange={(e) => onUpdateGoal(field.key, Number(e.target.value))}
-                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  className="w-full h-2 bg-nm-surface-high rounded-full appearance-none cursor-pointer accent-nm-signature"
                 />
               )}
               {isEditable && recommendedValue !== null && (
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-nm-label-md text-nm-text/30 mt-1">
                   Recommended: {typeof recommendedValue === 'number' ? recommendedValue.toLocaleString() : recommendedValue} {field.unit}
                 </p>
               )}
@@ -557,17 +553,17 @@ function GoalModeSection({
 
 function WaterGoalCard({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div className="bg-nm-surface-lowest rounded-[2rem] p-6 shadow-nm-float">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-cyan-50 text-cyan-600">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center bg-nm-success/10 text-nm-success">
             <Droplets className="w-4 h-4" />
           </div>
-          <span className="text-sm font-medium text-gray-900">Water Goal</span>
+          <span className="text-sm font-bold text-nm-text">Water Goal</span>
         </div>
         <div className="flex items-baseline gap-1">
-          <span className="text-lg font-bold text-gray-900">{value}</span>
-          <span className="text-xs text-gray-400">cups</span>
+          <span className="text-lg font-bold text-nm-text">{value}</span>
+          <span className="text-nm-label-md text-nm-text/40">cups</span>
         </div>
       </div>
       <input
@@ -577,9 +573,9 @@ function WaterGoalCard({ value, onChange }: { value: number; onChange: (v: numbe
         step={1}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+        className="w-full h-2 bg-nm-surface-high rounded-full appearance-none cursor-pointer accent-nm-success"
       />
-      <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+      <div className="flex justify-between text-nm-label-md text-nm-text/30 mt-1">
         <span>1 cup</span>
         <span>20 cups</span>
       </div>
@@ -595,16 +591,16 @@ function NumberField({
 }) {
   return (
     <div>
-      <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-1.5 block">{label}</label>
+      <label className="text-nm-label-md text-nm-text/60 uppercase tracking-widest mb-2 block">{label}</label>
       <div className="relative">
         <input
           type="number"
           value={value ?? ''}
           onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
           placeholder={placeholder}
-          className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent pr-9"
+          className="w-full px-4 py-3 bg-nm-surface-high rounded-full text-sm text-nm-text focus:outline-none focus:ring-2 focus:ring-nm-signature/40 focus:bg-nm-surface-lowest pr-9"
         />
-        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{unit}</span>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-nm-label-md text-nm-text/40">{unit}</span>
       </div>
     </div>
   );

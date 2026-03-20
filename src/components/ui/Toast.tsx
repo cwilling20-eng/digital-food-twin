@@ -12,7 +12,7 @@ interface ToastProps {
 export function Toast({ message, type, icon, onDismiss, duration = 4000 }: ToastProps) {
   const bgColors = {
     info: 'bg-blue-600',
-    success: 'bg-emerald-600',
+    success: 'bg-nm-signature',
     warning: 'bg-amber-600',
     error: 'bg-red-600'
   };

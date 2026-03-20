@@ -175,10 +175,10 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white pb-20">
+    <div className="min-h-screen bg-nm-bg pb-20">
       <div className="px-6 pt-8 pb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Menu Scanner</h1>
-        <p className="text-gray-500">Scan or upload a menu for personalized recommendations</p>
+        <h1 className="text-2xl font-bold text-nm-text mb-2">Menu Scanner</h1>
+        <p className="text-nm-text/60">Scan or upload a menu for personalized recommendations</p>
       </div>
 
       <div className="px-6">
@@ -210,10 +210,10 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
 
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-48 h-64">
-                  <div className="absolute top-0 left-0 w-6 h-6 border-t-3 border-l-3 border-emerald-400 rounded-tl-lg" />
-                  <div className="absolute top-0 right-0 w-6 h-6 border-t-3 border-r-3 border-emerald-400 rounded-tr-lg" />
-                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-3 border-l-3 border-emerald-400 rounded-bl-lg" />
-                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-3 border-r-3 border-emerald-400 rounded-br-lg" />
+                  <div className="absolute top-0 left-0 w-6 h-6 border-t-3 border-l-3 border-nm-signature rounded-tl-lg" />
+                  <div className="absolute top-0 right-0 w-6 h-6 border-t-3 border-r-3 border-nm-signature rounded-tr-lg" />
+                  <div className="absolute bottom-0 left-0 w-6 h-6 border-b-3 border-l-3 border-nm-signature rounded-bl-lg" />
+                  <div className="absolute bottom-0 right-0 w-6 h-6 border-b-3 border-r-3 border-nm-signature rounded-br-lg" />
                 </div>
               </div>
             </>
@@ -221,21 +221,21 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
 
           {isScanning && (
             <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center">
-              <Loader2 className="w-12 h-12 text-emerald-400 animate-spin mb-4" />
+              <Loader2 className="w-12 h-12 text-nm-signature animate-spin mb-4" />
               <p className="text-white font-semibold text-lg mb-2">Analyzing Menu</p>
-              <p className="text-emerald-200 text-sm">Getting your personalized recommendations...</p>
+              <p className="text-nm-surface-high text-sm">Getting your personalized recommendations...</p>
             </div>
           )}
         </div>
 
-        <div className="mb-6 bg-white rounded-2xl p-2 border-2 border-gray-200">
+        <div className="mb-6 bg-nm-surface-lowest rounded-[2rem] p-2 shadow-nm-float">
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setScanMode('goal')}
-              className={`py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+              className={`py-3 px-4 rounded-full font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 ${
                 scanMode === 'goal'
-                  ? 'bg-emerald-500 text-white shadow-md'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-gradient-to-br from-nm-signature to-nm-signature-light text-white shadow-nm-float'
+                  : 'text-nm-text/60 hover:bg-nm-surface'
               }`}
             >
               <span>🎯</span>
@@ -243,17 +243,17 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
             </button>
             <button
               onClick={() => setScanMode('enjoyment')}
-              className={`py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+              className={`py-3 px-4 rounded-full font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 ${
                 scanMode === 'enjoyment'
-                  ? 'bg-amber-500 text-white shadow-md'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-nm-accent text-white shadow-nm-accent'
+                  : 'text-nm-text/60 hover:bg-nm-surface'
               }`}
             >
               <span>😌</span>
               Enjoyment Mode
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-3 text-center">
+          <p className="text-nm-label-md text-nm-text/40 mt-3 text-center">
             {scanMode === 'goal'
               ? 'Strict, health-focused recommendations'
               : 'Flavor-focused, relaxed recommendations'}
@@ -286,7 +286,7 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
                 disabled={isScanning}
                 className={`w-full ${
                   scanMode === 'goal'
-                    ? 'bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 shadow-emerald-600/30'
+                    ? 'bg-nm-signature hover:bg-nm-text disabled:bg-nm-signature shadow-nm-signature/30'
                     : 'bg-amber-500 hover:bg-amber-600 disabled:bg-amber-400 shadow-amber-500/30'
                 } disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]`}
               >
@@ -309,7 +309,7 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
               disabled={isScanning}
               className={`w-full bg-white border-2 border-gray-200 ${
                 scanMode === 'goal'
-                  ? 'hover:border-emerald-400 hover:bg-emerald-50'
+                  ? 'hover:border-nm-signature hover:bg-nm-bg'
                   : 'hover:border-amber-400 hover:bg-amber-50'
               } disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-semibold py-4 px-8 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98]`}
             >
@@ -321,14 +321,14 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
 
         {uploadedImage && !isScanning && (
           <div className="mt-4 space-y-3">
-            <div className="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-2xl">
+            <div className="p-4 bg-nm-bg border-2 border-nm-surface-high rounded-2xl">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-nm-bg0 rounded-xl flex items-center justify-center">
                   <Image className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-900">Menu Image Ready</p>
-                  <p className="text-xs text-emerald-700">Ready to analyze your menu</p>
+                  <p className="text-xs text-nm-text">Ready to analyze your menu</p>
                 </div>
                 <button
                   onClick={clearUploadedImage}
@@ -337,7 +337,7 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
                   <X className="w-4 h-4 text-gray-600" />
                 </button>
               </div>
-              <div className="rounded-xl overflow-hidden border-2 border-emerald-300">
+              <div className="rounded-xl overflow-hidden border-2 border-nm-surface-highest">
                 <img
                   src={uploadedImage}
                   alt="Menu preview"
@@ -349,7 +349,7 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
               onClick={handleScan}
               className={`w-full ${
                 scanMode === 'goal'
-                  ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
+                  ? 'bg-nm-signature hover:bg-nm-text shadow-nm-signature/30'
                   : 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/30'
               } text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]`}
             >

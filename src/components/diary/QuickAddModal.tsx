@@ -133,27 +133,29 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
   };
 
   const confidenceColors: Record<string, string> = {
-    low: 'text-amber-600 bg-amber-50',
-    medium: 'text-emerald-600 bg-emerald-50',
-    high: 'text-blue-600 bg-blue-50'
+    low: 'text-nm-accent bg-nm-accent/10',
+    medium: 'text-nm-signature bg-nm-signature/10',
+    high: 'text-nm-success bg-nm-success/10'
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl max-w-md w-full max-h-[92vh] overflow-y-auto animate-slide-up">
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-3xl sm:rounded-t-2xl z-10">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Utensils className="w-5 h-5 text-emerald-500" />
+      <div className="bg-nm-surface-lowest rounded-[2rem] rounded-b-none sm:rounded-[2rem] shadow-nm-float max-w-md w-full max-h-[92vh] overflow-y-auto animate-slide-up">
+        {/* Header */}
+        <div className="sticky top-0 bg-nm-surface-lowest px-8 py-5 flex items-center justify-between rounded-t-[2rem] z-10">
+          <h2 className="text-xl font-bold text-nm-text flex items-center gap-2">
+            <Utensils className="w-5 h-5 text-nm-signature" />
             Log Food
           </h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-            <X className="w-5 h-5 text-gray-500" />
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-nm-surface transition-colors">
+            <X className="w-5 h-5 text-nm-text/40" />
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
+        <div className="px-8 pb-8 space-y-6">
+          {/* Meal name input — pill-shaped */}
           <div>
-            <label htmlFor="qa-meal-name" className="block text-sm font-medium text-gray-700 mb-1.5">What did you eat?</label>
+            <label htmlFor="qa-meal-name" className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">What did you eat?</label>
             <input
               id="qa-meal-name"
               type="text"
@@ -161,41 +163,42 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
               onChange={(e) => handleMealNameChange(e.target.value)}
               placeholder="e.g., Grilled Chicken Salad"
               autoFocus
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm bg-white"
+              className="w-full px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
             />
           </div>
 
+          {/* Nutrition estimate preview */}
           {mealName.trim() && (isEstimatingNutrition || nutritionEstimate) && (
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
+            <div className="bg-nm-surface rounded-[2rem] p-6">
               {isEstimatingNutrition ? (
-                <div className="flex items-center gap-2 text-emerald-700">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                <div className="flex items-center gap-2 text-nm-text">
+                  <Loader2 className="w-4 h-4 animate-spin text-nm-signature" />
                   <span className="text-sm font-medium">Estimating nutrition...</span>
                 </div>
               ) : nutritionEstimate && (
                 <>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Estimated Nutrition</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${confidenceColors[nutritionEstimate.confidence]}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-nm-label-md text-nm-text/40 uppercase tracking-wider">Estimated Nutrition</span>
+                    <span className={`text-nm-label-md px-3 py-1 rounded-full font-bold ${confidenceColors[nutritionEstimate.confidence]}`}>
                       {nutritionEstimate.confidence}
                     </span>
                   </div>
                   <div className="grid grid-cols-4 gap-3">
                     <div className="text-center">
-                      <div className="text-xl font-bold text-gray-900">{nutritionEstimate.calories}</div>
-                      <div className="text-[10px] text-gray-500 uppercase">Cal</div>
+                      <div className="text-2xl font-black text-nm-text">{nutritionEstimate.calories}</div>
+                      <div className="text-nm-label-md text-nm-text/40 uppercase">Cal</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-blue-600">{nutritionEstimate.protein_g}g</div>
-                      <div className="text-[10px] text-gray-500 uppercase">Protein</div>
+                      <div className="text-2xl font-black text-nm-signature">{nutritionEstimate.protein_g}g</div>
+                      <div className="text-nm-label-md text-nm-text/40 uppercase">Protein</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-amber-600">{nutritionEstimate.carbs_g}g</div>
-                      <div className="text-[10px] text-gray-500 uppercase">Carbs</div>
+                      <div className="text-2xl font-black text-nm-accent">{nutritionEstimate.carbs_g}g</div>
+                      <div className="text-nm-label-md text-nm-text/40 uppercase">Carbs</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-rose-600">{nutritionEstimate.fat_g}g</div>
-                      <div className="text-[10px] text-gray-500 uppercase">Fat</div>
+                      <div className="text-2xl font-black text-nm-text/80">{nutritionEstimate.fat_g}g</div>
+                      <div className="text-nm-label-md text-nm-text/40 uppercase">Fat</div>
                     </div>
                   </div>
                 </>
@@ -203,62 +206,66 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
             </div>
           )}
 
+          {/* Meal type selector */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Meal type</label>
-            <div className="grid grid-cols-4 gap-2">
+            <label className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-3">Meal type</label>
+            <div className="grid grid-cols-4 gap-3">
               {MEAL_TYPES.map((type) => (
                 <button
                   key={type.label}
                   onClick={() => setSelectedMealType(type.label)}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all ${
+                  className={`flex flex-col items-center justify-center p-3 rounded-[2rem] transition-all active:scale-95 ${
                     selectedMealType === type.label
-                      ? 'border-emerald-500 bg-emerald-50'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                      ? 'bg-nm-signature text-white shadow-nm-float'
+                      : 'bg-nm-surface text-nm-text hover:bg-nm-surface-high'
                   }`}
                 >
-                  <span className="text-xl mb-0.5">{type.emoji}</span>
-                  <span className="text-[11px] text-gray-700 font-medium">{type.display}</span>
+                  <span className="text-xl mb-1">{type.emoji}</span>
+                  <span className="text-nm-label-md font-bold">{type.display}</span>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Feeling selector */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">How do you feel?</label>
+            <label className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-3">How do you feel?</label>
             <div className="grid grid-cols-5 gap-2">
               {FEELINGS.map((feeling) => (
                 <button
                   key={feeling.label}
                   onClick={() => setSelectedFeeling(feeling.label)}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl border-2 transition-all ${
+                  className={`flex flex-col items-center justify-center p-2.5 rounded-[1.5rem] transition-all active:scale-95 ${
                     selectedFeeling === feeling.label
-                      ? 'border-emerald-500 bg-emerald-50'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                      ? 'bg-nm-signature text-white shadow-nm-float'
+                      : 'bg-nm-surface text-nm-text hover:bg-nm-surface-high'
                   }`}
                 >
                   <span className="text-xl mb-0.5">{feeling.emoji}</span>
-                  <span className="text-[10px] text-gray-700 font-medium leading-tight">{feeling.label}</span>
+                  <span className="text-[10px] font-bold leading-tight">{feeling.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Notes — pill-shaped textarea */}
           <div>
-            <label htmlFor="qa-notes" className="block text-sm font-medium text-gray-700 mb-1.5">Notes (optional)</label>
+            <label htmlFor="qa-notes" className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">Notes (optional)</label>
             <textarea
               id="qa-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional thoughts?"
               rows={2}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm resize-none bg-white"
+              className="w-full px-5 py-3.5 bg-nm-surface-high rounded-[1.5rem] text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm resize-none"
             />
           </div>
 
+          {/* CTA — coral gradient pill */}
           <button
             onClick={handleSave}
             disabled={!mealName.trim() || !selectedFeeling || isSaving || isEstimatingNutrition}
-            className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="w-full py-4 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white font-bold rounded-full shadow-nm-float transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
           >
             {isSaving ? (
               <>
@@ -269,7 +276,7 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
               <>
                 Log Food
                 {nutritionEstimate && (
-                  <span className="text-emerald-200 font-normal">
+                  <span className="text-white/70 font-normal">
                     ({nutritionEstimate.calories} cal)
                   </span>
                 )}

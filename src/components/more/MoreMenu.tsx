@@ -41,8 +41,8 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
         label: 'Progress',
         subtitle: 'Trends and insights over time',
         screen: 'progress',
-        color: 'text-teal-600',
-        bgColor: 'bg-teal-50',
+        color: 'text-nm-signature',
+        bgColor: 'bg-nm-bg',
       },
     ],
   },
@@ -54,8 +54,8 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
         label: 'Food DNA Hub',
         subtitle: 'Taste profile, diets & allergies',
         screen: 'food-dna',
-        color: 'text-emerald-600',
-        bgColor: 'bg-emerald-50',
+        color: 'text-nm-signature',
+        bgColor: 'bg-nm-bg',
       },
       {
         icon: <MessageCircle className="w-5 h-5" />,
@@ -100,7 +100,7 @@ export function MoreMenu({ userEmail, onNavigate, onLogout }: MoreMenuProps) {
     <div className="min-h-screen bg-gray-50 pb-24">
       <div className="bg-white px-6 pt-12 pb-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-md shadow-emerald-500/20">
+          <div className="w-14 h-14 bg-gradient-to-br from-nm-signature to-nm-signature rounded-full flex items-center justify-center shadow-md shadow-nm-bg0/20">
             <span className="text-lg font-bold text-white">{initials}</span>
           </div>
           <div className="flex-1 min-w-0">

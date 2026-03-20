@@ -25,8 +25,8 @@ export function ProgressScreen({ onBack }: ProgressScreenProps) {
       </div>
 
       <div className="flex flex-col items-center justify-center px-6 pt-24">
-        <div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center mb-5">
-          <TrendingUp className="w-9 h-9 text-teal-400" />
+        <div className="w-20 h-20 bg-nm-bg rounded-full flex items-center justify-center mb-5">
+          <TrendingUp className="w-9 h-9 text-nm-success" />
         </div>
         <h2 className="text-lg font-bold text-gray-900 mb-2">Coming Soon</h2>
         <p className="text-sm text-gray-500 text-center leading-relaxed max-w-xs">

@@ -96,13 +96,13 @@ function LocationIndicator({ status, location }: { status: LocationStatus; locat
         return { icon: <Wifi className="w-4 h-4 animate-pulse" />, text: 'Network...', color: 'text-amber-500' };
       case 'success':
         if (location?.source === 'gps') {
-          return { icon: <MapPin className="w-4 h-4" />, text: 'GPS', color: 'text-emerald-500' };
+          return { icon: <MapPin className="w-4 h-4" />, text: 'GPS', color: 'text-nm-bg0' };
         } else if (location?.source === 'network') {
-          return { icon: <Wifi className="w-4 h-4" />, text: 'Network', color: 'text-emerald-500' };
+          return { icon: <Wifi className="w-4 h-4" />, text: 'Network', color: 'text-nm-bg0' };
         } else if (location?.source === 'ip_fallback') {
           return { icon: <Wifi className="w-4 h-4" />, text: 'Approximate', color: 'text-amber-500' };
         }
-        return { icon: <MapPin className="w-4 h-4" />, text: 'Located', color: 'text-emerald-500' };
+        return { icon: <MapPin className="w-4 h-4" />, text: 'Located', color: 'text-nm-bg0' };
       case 'denied':
         return { icon: <WifiOff className="w-4 h-4" />, text: 'Denied', color: 'text-red-500' };
       case 'unavailable':
@@ -138,8 +138,8 @@ function NutritionPreview({
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
-        <div className="flex items-center gap-2 text-emerald-700">
+      <div className="bg-gradient-to-r from-nm-bg to-nm-bg rounded-xl p-4 border border-nm-surface">
+        <div className="flex items-center gap-2 text-nm-text">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm font-medium">Estimating nutrition...</span>
         </div>
@@ -151,14 +151,14 @@ function NutritionPreview({
 
   const confidenceColors = {
     low: 'text-amber-600 bg-amber-50',
-    medium: 'text-emerald-600 bg-emerald-50',
+    medium: 'text-nm-signature bg-nm-bg',
     high: 'text-blue-600 bg-blue-50'
   };
 
   return (
-    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
+    <div className="bg-gradient-to-r from-nm-bg to-nm-bg rounded-xl p-4 border border-nm-surface">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Estimated Nutrition</span>
+        <span className="text-xs font-medium text-nm-text uppercase tracking-wide">Estimated Nutrition</span>
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${confidenceColors[nutrition.confidence]}`}>
           {nutrition.confidence} confidence
         </span>
@@ -221,7 +221,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
     return `Hi! I'm finding ${mealType} spots for you, ${otherPeople}, and ${lastPerson}. I'll consider everyone's food preferences to find the perfect match!`;
   };
 
-  const defaultMessage = getGroupDiningMessage() || initialAnalysis || "Hi! I'm your Food Concierge. I can help you find lunch, track calories, or plan your next meal. What's on your mind?";
+  const defaultMessage = getGroupDiningMessage() || initialAnalysis || "Hi! I'm NomMigo, your food amigo. I can help you find lunch, track calories, or plan your next meal. What's on your mind?";
 
   const [todayProgress, setTodayProgress] = useState<TodayProgress>({
     calories_consumed: 0, protein_consumed: 0, carbs_consumed: 0, fat_consumed: 0, meals_logged: 0
@@ -737,7 +737,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
   const isInputDisabled = isTyping || isLocating;
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="h-screen bg-nm-bg flex flex-col overflow-hidden">
       {/* Error Toast */}
       {errorMessage && (
         <Toast
@@ -779,19 +779,19 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
       )}
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 flex-shrink-0 z-10">
+      <div className="bg-nm-bg/80 backdrop-blur-xl px-4 py-3 flex items-center gap-3 flex-shrink-0 z-10">
         <button
           onClick={onBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-nm-surface transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <ArrowLeft className="w-5 h-5 text-nm-text" />
         </button>
         <div className="flex-1">
-          <h1 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            Food Twin Assistant
+          <h1 className="text-lg font-bold text-nm-text flex items-center gap-2">
+            NomMigo
             <LocationIndicator status={locationStatus} location={location} />
           </h1>
-          <p className="text-xs text-gray-500">AI-powered recommendations</p>
+          <p className="text-xs text-nm-text/40">Your food amigo</p>
         </div>
         <button
           onClick={() => {
@@ -802,7 +802,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
               setShowLogModal(true);
             }
           }}
-          className="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors"
+          className="px-3 py-2 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white text-sm font-bold rounded-full flex items-center gap-2 active:scale-95 transition-transform"
         >
           <ClipboardList className="w-4 h-4" />
           <span className="hidden sm:inline">Log Meal</span>
@@ -811,7 +811,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
       {/* Group Dining Banner */}
       {groupDining?.isGroupDining && groupDining.selectedFriendNames.length > 0 && (
-        <div className="bg-gradient-to-r from-teal-500 to-emerald-500 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+        <div className="bg-gradient-to-r from-nm-bg0 to-nm-bg0 px-4 py-3 flex items-center gap-3 flex-shrink-0">
           <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
             <Users className="w-4 h-4 text-white" />
           </div>
@@ -856,21 +856,21 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+              className={`max-w-[85%] px-5 py-3.5 ${
                 message.role === 'user'
-                  ? 'bg-emerald-500 text-white rounded-br-sm'
-                  : 'bg-white border border-gray-200 text-gray-900 rounded-bl-sm shadow-sm'
+                  ? 'bg-nm-signature text-white rounded-[1.5rem] rounded-br-sm'
+                  : 'bg-nm-surface-lowest text-nm-text rounded-[1.5rem] rounded-bl-sm shadow-nm-float'
               }`}
             >
               {message.role === 'assistant' ? (
-                <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-headings:mb-2 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-3 prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:text-gray-700 prose-ul:my-2 prose-ol:text-gray-700 prose-ol:my-2 prose-li:mb-1">
+                <div className="prose prose-sm max-w-none prose-headings:text-nm-text prose-headings:font-bold prose-headings:mb-2 prose-p:text-nm-text/80 prose-p:leading-relaxed prose-p:mb-3 prose-strong:text-nm-text prose-strong:font-bold prose-ul:text-nm-text/80 prose-ul:my-2 prose-ol:text-nm-text/80 prose-ol:my-2 prose-li:mb-1">
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
               ) : (
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
               )}
               <p className={`text-xs mt-2 ${
-                message.role === 'user' ? 'text-emerald-100' : 'text-gray-400'
+                message.role === 'user' ? 'text-white/60' : 'text-nm-text/30'
               }`}>
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
@@ -880,11 +880,11 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+            <div className="bg-nm-surface-lowest rounded-[1.5rem] rounded-bl-sm px-5 py-3.5 shadow-nm-float">
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="w-2 h-2 bg-nm-signature/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 bg-nm-signature/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-nm-signature/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </div>
@@ -894,18 +894,18 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
       </div>
 
       {/* Input Area */}
-      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-40 safe-area-inset max-w-md mx-auto">
+      <div className="fixed bottom-20 left-0 right-0 bg-nm-bg/80 backdrop-blur-xl px-4 py-3 z-40 safe-area-inset max-w-md mx-auto">
         {isLocating && (
-          <div className="flex items-center justify-center gap-2 mb-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg animate-fade-in border border-blue-100">
-            <MapPin className="w-4 h-4 flex-shrink-0 animate-pulse text-blue-600" />
-            <span className="text-xs font-medium text-blue-700">
+          <div className="flex items-center justify-center gap-2 mb-2 px-4 py-2 bg-nm-surface rounded-full animate-fade-in">
+            <MapPin className="w-4 h-4 flex-shrink-0 animate-pulse text-nm-signature" />
+            <span className="text-xs font-bold text-nm-text/60">
               {statusMessage || 'Acquiring location...'}
             </span>
           </div>
         )}
-        
+
         <div className="flex items-end gap-2 max-w-md mx-auto">
-          <div className="flex-1 bg-gray-100 rounded-2xl px-4 py-3 flex items-center gap-2">
+          <div className="flex-1 bg-nm-surface-high rounded-full px-5 py-3 flex items-center gap-2">
             <input
               ref={inputRef}
               type="text"
@@ -914,13 +914,13 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
               onKeyPress={handleKeyPress}
               placeholder={initialAnalysis ? "Ask a follow-up question..." : "Type your message..."}
               disabled={isInputDisabled}
-              className="flex-1 bg-transparent outline-none text-sm text-gray-900 placeholder-gray-500 disabled:opacity-50"
+              className="flex-1 bg-transparent outline-none text-sm text-nm-text placeholder-nm-text/30 disabled:opacity-50"
             />
           </div>
           <button
             onClick={handleSend}
             disabled={!inputMessage.trim() || isInputDisabled}
-            className="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-colors active:scale-95"
+            className="w-12 h-12 bg-nm-signature hover:opacity-90 disabled:bg-nm-surface-high disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-all active:scale-95"
           >
             {isLocating ? (
               <MapPin className="w-5 h-5 text-white animate-pulse" />
@@ -935,25 +935,25 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
       {/* Log Meal Modal */}
       {showLogModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                <Utensils className="w-5 h-5 text-emerald-500" />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-nm-surface-lowest rounded-[2rem] shadow-nm-float max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-nm-surface-lowest px-8 py-5 flex items-center justify-between rounded-t-[2rem]">
+              <h2 className="text-xl font-bold text-nm-text flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-nm-signature" />
                 Log Meal
               </h2>
               <button
                 onClick={handleCloseModal}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-nm-surface transition-colors"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-5 h-5 text-nm-text/40" />
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
+            <div className="px-8 pb-8 space-y-5">
               {/* Meal Name Input */}
               <div>
-                <label htmlFor="meal-name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="meal-name" className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">
                   What did you eat?
                 </label>
                 <input
@@ -962,7 +962,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
                   value={mealName}
                   onChange={(e) => handleMealNameChange(e.target.value)}
                   placeholder="e.g., Spicy Thai Basil Chicken with Rice"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm"
+                  className="w-full px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
                 />
               </div>
 
@@ -975,7 +975,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
               {/* Meal Type Selector */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-3">
                   Meal type
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -983,14 +983,14 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
                     <button
                       key={type.label}
                       onClick={() => setSelectedMealType(type.label)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+                      className={`flex flex-col items-center justify-center p-3 rounded-[2rem] transition-all active:scale-95 ${
                         selectedMealType === type.label
-                          ? 'border-emerald-500 bg-emerald-50'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                          ? 'bg-nm-signature text-white shadow-nm-float'
+                          : 'bg-nm-surface text-nm-text hover:bg-nm-surface-high'
                       }`}
                     >
                       <span className="text-2xl mb-1">{type.emoji}</span>
-                      <span className="text-xs text-gray-700 font-medium text-center leading-tight">
+                      <span className="text-xs font-bold text-center leading-tight">
                         {type.display}
                       </span>
                     </button>
@@ -1000,7 +1000,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
               {/* Feeling Selector */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-3">
                   How do you feel after eating?
                 </label>
                 <div className="grid grid-cols-5 gap-2">
@@ -1008,14 +1008,14 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
                     <button
                       key={feeling.label}
                       onClick={() => setSelectedFeeling(feeling.label)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-[1.5rem] transition-all active:scale-95 ${
                         selectedFeeling === feeling.label
-                          ? 'border-emerald-500 bg-emerald-50'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                          ? 'bg-nm-signature text-white shadow-nm-float'
+                          : 'bg-nm-surface text-nm-text hover:bg-nm-surface-high'
                       }`}
                     >
-                      <span className="text-2xl mb-1">{feeling.emoji}</span>
-                      <span className="text-xs text-gray-700 font-medium text-center leading-tight">
+                      <span className="text-xl mb-0.5">{feeling.emoji}</span>
+                      <span className="text-[10px] font-bold text-center leading-tight">
                         {feeling.label}
                       </span>
                     </button>
@@ -1025,7 +1025,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
               {/* Notes */}
               <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="notes" className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">
                   Notes (optional)
                 </label>
                 <textarea
@@ -1034,7 +1034,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any additional thoughts about this meal?"
                   rows={2}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm resize-none"
+                  className="w-full px-5 py-3.5 bg-nm-surface-high rounded-[1.5rem] text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm resize-none"
                 />
               </div>
 
@@ -1042,7 +1042,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
               <button
                 onClick={handleSaveMealLog}
                 disabled={!mealName.trim() || !selectedFeeling || isSaving}
-                className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="w-full py-4 bg-gradient-to-br from-nm-signature to-nm-signature-light disabled:opacity-40 text-white font-bold rounded-full transition-all flex items-center justify-center gap-2 active:scale-95 shadow-nm-float"
               >
                 {isSaving ? (
                   <>
@@ -1053,7 +1053,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
                   <>
                     Save Meal
                     {nutritionEstimate && (
-                      <span className="text-emerald-200 font-normal">
+                      <span className="text-white/70 font-normal">
                         ({nutritionEstimate.calories} cal)
                       </span>
                     )}
@@ -1067,8 +1067,8 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
       {/* Meal Saved Toast */}
       {showMealToast && (
-        <div className="fixed bottom-40 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2 animate-fade-in">
-          <span className="text-sm font-medium">Meal logged! I'll remember this for your recommendations.</span>
+        <div className="fixed bottom-40 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
+          <span className="text-sm font-bold">Meal logged! I'll remember this for your recommendations.</span>
         </div>
       )}
     </div>

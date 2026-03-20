@@ -70,8 +70,8 @@ export function BottomNav({ currentScreen, onNavigate, onQuickAdd, onScanMenu }:
                     }}
                     className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-xl border border-gray-100 hover:bg-gray-50 transition-colors min-w-[180px]"
                   >
-                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                      <Utensils className="w-5 h-5 text-emerald-600" />
+                    <div className="w-10 h-10 bg-nm-surface rounded-xl flex items-center justify-center">
+                      <Utensils className="w-5 h-5 text-nm-signature" />
                     </div>
                     <div className="text-left">
                       <p className="text-sm font-semibold text-gray-900">Log Food</p>
@@ -86,7 +86,7 @@ export function BottomNav({ currentScreen, onNavigate, onQuickAdd, onScanMenu }:
                 className={`absolute -top-7 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-95 z-50 ${
                   showActions
                     ? 'bg-gray-800 shadow-gray-800/30 rotate-0'
-                    : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30'
+                    : 'bg-nm-bg0 hover:bg-nm-signature shadow-nm-bg0/30'
                 }`}
               >
                 {showActions ? (
@@ -112,7 +112,7 @@ export function BottomNav({ currentScreen, onNavigate, onQuickAdd, onScanMenu }:
                 onClick={() => onNavigate(screen)}
                 className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
                   isActive
-                    ? 'text-emerald-600'
+                    ? 'text-nm-signature'
                     : 'text-gray-400 hover:text-gray-600'
                 }`}
               >

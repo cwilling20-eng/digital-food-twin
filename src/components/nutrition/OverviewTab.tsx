@@ -52,7 +52,7 @@ export function OverviewTab({ meals, goals }: OverviewTabProps) {
             {meals.map((meal, i) => (
               <div key={i} className="flex items-center justify-between py-1.5">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-nm-signature flex-shrink-0" />
                   <span className="text-sm text-gray-700 truncate">{meal.meal_name}</span>
                 </div>
                 <span className="text-sm text-gray-500 ml-2 flex-shrink-0">

@@ -83,13 +83,13 @@ export function CaloriesTab({ meals, goals }: CaloriesTabProps) {
           <div className="h-px bg-gray-100" />
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-gray-600">Goal</span>
-            <span className="text-sm font-semibold text-emerald-600">{goals.calorieGoal.toLocaleString()}</span>
+            <span className="text-sm font-semibold text-nm-signature">{goals.calorieGoal.toLocaleString()}</span>
           </div>
           <div className="h-px bg-gray-100" />
           <div className="flex items-center justify-between py-2">
             <span className="text-sm text-gray-600">Remaining</span>
             <span className={`text-sm font-semibold ${
-              goals.calorieGoal - totalCalories >= 0 ? 'text-emerald-600' : 'text-red-500'
+              goals.calorieGoal - totalCalories >= 0 ? 'text-nm-signature' : 'text-red-500'
             }`}>
               {(goals.calorieGoal - totalCalories).toLocaleString()}
             </span>

@@ -58,50 +58,51 @@ export function FriendProfileModal({
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto animate-slide-up">
-        <div className="sticky top-0 bg-white px-6 pt-4 pb-3 border-b border-gray-100">
+      <div className="absolute bottom-0 left-0 right-0 bg-nm-surface-lowest rounded-[2rem] rounded-b-none max-h-[85vh] overflow-y-auto animate-slide-up">
+        <div className="sticky top-0 bg-nm-surface-lowest px-8 pt-5 pb-4 rounded-t-[2rem]">
+          <div className="w-10 h-1 bg-nm-surface-high rounded-full mx-auto mb-4" />
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">Friend Profile</h2>
+            <h2 className="text-xl font-bold text-nm-text">Friend Profile</h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-nm-surface transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-nm-text/40" />
             </button>
           </div>
         </div>
 
-        <div className="px-6 py-6 space-y-6">
+        <div className="px-8 py-6 space-y-6">
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-2xl mb-3">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-nm-signature to-nm-signature-light flex items-center justify-center text-white font-bold text-2xl mb-3">
               {friend.profile.avatarUrl ? (
                 <img src={friend.profile.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
               ) : (
                 getInitials(friend.profile.displayName)
               )}
             </div>
-            <h3 className="text-xl font-bold text-gray-900">{friend.profile.displayName}</h3>
+            <h3 className="text-xl font-bold text-nm-text">{friend.profile.displayName}</h3>
             {friend.profile.username && (
-              <p className="text-gray-500">@{friend.profile.username}</p>
+              <p className="text-nm-text/60">@{friend.profile.username}</p>
             )}
           </div>
 
           {friend.profile.shareFoodDna ? (
             loading ? (
-              <div className="text-center text-gray-500 py-4">Loading Food DNA...</div>
+              <div className="text-center text-nm-text/40 py-4">Loading Food DNA...</div>
             ) : (
               <div className="space-y-4">
                 {sharedPrefs.length > 0 && (
-                  <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 border border-pink-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Heart className="w-5 h-5 text-pink-500" />
-                      <span className="font-semibold text-pink-900">You both love</span>
+                  <div className="bg-nm-signature/10 rounded-[2rem] p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Heart className="w-5 h-5 text-nm-signature" />
+                      <span className="font-bold text-nm-text">You both love</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {sharedPrefs.map(pref => (
                         <span
                           key={pref}
-                          className="px-3 py-1 bg-white/80 rounded-full text-sm font-medium text-pink-700"
+                          className="px-3 py-1.5 bg-nm-surface-lowest rounded-full text-sm font-bold text-nm-signature"
                         >
                           {pref}
                         </span>
@@ -111,16 +112,16 @@ export function FriendProfileModal({
                 )}
 
                 {foodDna && foodDna.favoriteCuisines.length > 0 && (
-                  <div className="bg-white rounded-xl p-4 border border-gray-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Utensils className="w-5 h-5 text-emerald-500" />
-                      <span className="font-semibold text-gray-900">Favorite Cuisines</span>
+                  <div className="bg-nm-surface rounded-[2rem] p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Utensils className="w-5 h-5 text-nm-signature" />
+                      <span className="font-bold text-nm-text">Favorite Cuisines</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {foodDna.favoriteCuisines.map(cuisine => (
                         <span
                           key={cuisine}
-                          className="px-3 py-1 bg-emerald-50 rounded-full text-sm font-medium text-emerald-700"
+                          className="px-3 py-1.5 bg-nm-surface-high rounded-full text-sm font-bold text-nm-text"
                         >
                           {cuisine}
                         </span>
@@ -130,16 +131,16 @@ export function FriendProfileModal({
                 )}
 
                 {foodDna && (foodDna.allergies.length > 0 || foodDna.restrictions.length > 0) && (
-                  <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="w-5 h-5 text-amber-600" />
-                      <span className="font-semibold text-amber-900">Dietary Restrictions</span>
+                  <div className="bg-nm-accent/10 rounded-[2rem] p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="w-5 h-5 text-nm-accent" />
+                      <span className="font-bold text-nm-text">Dietary Restrictions</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {foodDna.allergies.map(allergy => (
                         <span
                           key={allergy}
-                          className="px-3 py-1 bg-red-100 rounded-full text-sm font-medium text-red-700"
+                          className="px-3 py-1.5 bg-nm-signature/10 rounded-full text-sm font-bold text-nm-signature"
                         >
                           {allergy} (Allergy)
                         </span>
@@ -147,7 +148,7 @@ export function FriendProfileModal({
                       {foodDna.restrictions.map(restriction => (
                         <span
                           key={restriction}
-                          className="px-3 py-1 bg-amber-100 rounded-full text-sm font-medium text-amber-700"
+                          className="px-3 py-1.5 bg-nm-accent/20 rounded-full text-sm font-bold text-nm-accent"
                         >
                           {restriction}
                         </span>
@@ -158,41 +159,41 @@ export function FriendProfileModal({
               </div>
             )
           ) : (
-            <div className="bg-gray-50 rounded-xl p-6 text-center">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Utensils className="w-6 h-6 text-gray-400" />
+            <div className="bg-nm-surface rounded-[2rem] p-8 text-center">
+              <div className="w-12 h-12 bg-nm-surface-high rounded-full flex items-center justify-center mx-auto mb-3">
+                <Utensils className="w-6 h-6 text-nm-text/30" />
               </div>
-              <p className="text-gray-600 font-medium">Food DNA is private</p>
-              <p className="text-gray-500 text-sm mt-1">
+              <p className="font-bold text-nm-text">Food DNA is private</p>
+              <p className="text-nm-text/60 text-sm mt-1">
                 This friend hasn't shared their food preferences
               </p>
             </div>
           )}
 
-          <div className="space-y-3 pt-4">
+          <div className="space-y-3 pt-2">
             <button
               onClick={onPlanDinner}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white font-bold rounded-full shadow-nm-float transition-all flex items-center justify-center gap-2 active:scale-95"
             >
               <Calendar className="w-5 h-5" />
               Plan Dinner Together
             </button>
 
             {showRemoveConfirm ? (
-              <div className="bg-red-50 rounded-xl p-4 border border-red-200">
-                <p className="text-red-800 font-medium text-center mb-3">
+              <div className="bg-nm-signature/10 rounded-[2rem] p-5">
+                <p className="text-nm-signature font-bold text-center mb-3">
                   Remove {friend.profile.displayName} as a friend?
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => setShowRemoveConfirm(false)}
-                    className="flex-1 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 py-3 bg-nm-surface text-nm-text font-bold rounded-full hover:bg-nm-surface-high transition-colors active:scale-95"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={onRemove}
-                    className="flex-1 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                    className="flex-1 py-3 bg-nm-signature text-white font-bold rounded-full hover:opacity-90 transition-opacity active:scale-95"
                   >
                     Remove
                   </button>
@@ -201,7 +202,7 @@ export function FriendProfileModal({
             ) : (
               <button
                 onClick={() => setShowRemoveConfirm(true)}
-                className="w-full py-3 text-red-600 font-medium rounded-xl border border-red-200 hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3.5 text-nm-text font-bold rounded-full hover:bg-nm-surface transition-colors flex items-center justify-center gap-2 active:scale-95"
               >
                 <Trash2 className="w-5 h-5" />
                 Remove Friend

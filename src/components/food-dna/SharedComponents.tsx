@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Plus, Check } from 'lucide-react';
+import { ProgressBar } from '../ui/ProgressBar';
 
 interface ChipSelectorProps {
   options: readonly string[];
@@ -10,25 +11,6 @@ interface ChipSelectorProps {
   customPlaceholder?: string;
 }
 
-const colorSchemes = {
-  emerald: {
-    selected: 'bg-emerald-500 text-white border-emerald-500',
-    unselected: 'bg-white text-gray-700 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50'
-  },
-  red: {
-    selected: 'bg-red-500 text-white border-red-500',
-    unselected: 'bg-white text-gray-700 border-gray-200 hover:border-red-300 hover:bg-red-50'
-  },
-  amber: {
-    selected: 'bg-amber-500 text-white border-amber-500',
-    unselected: 'bg-white text-gray-700 border-gray-200 hover:border-amber-300 hover:bg-amber-50'
-  },
-  blue: {
-    selected: 'bg-blue-500 text-white border-blue-500',
-    unselected: 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-  }
-};
-
 export function ChipSelector({
   options,
   selected,
@@ -38,7 +20,6 @@ export function ChipSelector({
   customPlaceholder = 'Add custom...'
 }: ChipSelectorProps) {
   const [customValue, setCustomValue] = useState('');
-  const colors = colorSchemes[colorScheme];
 
   const toggleOption = (option: string) => {
     if (selected.includes(option)) {
@@ -65,8 +46,10 @@ export function ChipSelector({
           <button
             key={option}
             onClick={() => toggleOption(option)}
-            className={`px-3 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
-              selected.includes(option) ? colors.selected : colors.unselected
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all active:scale-95 ${
+              selected.includes(option)
+                ? 'bg-nm-signature text-white shadow-nm-float'
+                : 'bg-nm-surface-high text-nm-text hover:bg-nm-surface-highest'
             }`}
           >
             {option}
@@ -81,12 +64,12 @@ export function ChipSelector({
             onChange={(e) => setCustomValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addCustom()}
             placeholder={customPlaceholder}
-            className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-xl text-sm focus:border-emerald-500 focus:outline-none"
+            className="flex-1 px-5 py-3 bg-nm-surface-high rounded-full text-sm text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40"
           />
           <button
             onClick={addCustom}
             disabled={!customValue.trim()}
-            className="px-3 py-2 bg-emerald-500 text-white rounded-xl disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="px-4 py-3 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white rounded-full disabled:opacity-40 active:scale-95 transition-transform"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -119,7 +102,7 @@ export function SliderInput({
 }: SliderInputProps) {
   return (
     <div>
-      <label className="text-sm font-medium text-gray-700 mb-2 block">
+      <label className="text-sm font-semibold text-nm-text mb-2 block">
         {label}{showValue && `: ${value}/${max}`}
       </label>
       <input
@@ -128,10 +111,10 @@ export function SliderInput({
         max={max}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+        className="w-full h-2 bg-nm-surface-high rounded-full appearance-none cursor-pointer accent-nm-signature"
       />
       {(leftLabel || rightLabel) && (
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <div className="flex justify-between text-nm-label-md text-nm-text/40 mt-1">
           <span>{leftLabel}</span>
           <span>{rightLabel}</span>
         </div>
@@ -149,17 +132,17 @@ interface TagInputProps {
 }
 
 const tagColors = {
-  emerald: 'bg-emerald-50 border-emerald-200 text-emerald-900',
-  amber: 'bg-amber-50 border-amber-200 text-amber-900',
-  red: 'bg-red-50 border-red-200 text-red-900',
-  blue: 'bg-blue-50 border-blue-200 text-blue-900'
+  emerald: 'bg-nm-surface text-nm-text',
+  amber: 'bg-nm-accent/10 text-nm-accent',
+  red: 'bg-nm-signature/10 text-nm-signature',
+  blue: 'bg-nm-success/10 text-nm-success'
 };
 
 const tagRemoveColors = {
-  emerald: 'text-emerald-500 hover:text-emerald-700',
-  amber: 'text-amber-500 hover:text-amber-700',
-  red: 'text-red-500 hover:text-red-700',
-  blue: 'text-blue-500 hover:text-blue-700'
+  emerald: 'text-nm-text/40 hover:text-nm-text',
+  amber: 'text-nm-accent/60 hover:text-nm-accent',
+  red: 'text-nm-signature/60 hover:text-nm-signature',
+  blue: 'text-nm-success/60 hover:text-nm-success'
 };
 
 export function TagInput({
@@ -203,23 +186,23 @@ export function TagInput({
             onFocus={() => setShowSuggestions(true)}
             onKeyPress={(e) => e.key === 'Enter' && input.trim() && addTag(input)}
             placeholder={placeholder}
-            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none"
+            className="flex-1 px-5 py-3 bg-nm-surface-high rounded-full text-sm text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40"
           />
           <button
             onClick={() => input.trim() && addTag(input)}
             disabled={!input.trim()}
-            className="px-4 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="px-4 py-3 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white rounded-full disabled:opacity-40 active:scale-95 transition-transform"
           >
             <Plus className="w-5 h-5" />
           </button>
         </div>
         {showSuggestions && filteredSuggestions.length > 0 && input && (
-          <div className="absolute top-full left-0 right-12 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
+          <div className="absolute top-full left-0 right-12 mt-2 bg-nm-surface-lowest rounded-[1.5rem] shadow-nm-float z-10 max-h-48 overflow-y-auto">
             {filteredSuggestions.slice(0, 8).map(suggestion => (
               <button
                 key={suggestion}
                 onClick={() => addTag(suggestion)}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 first:rounded-t-xl last:rounded-b-xl"
+                className="w-full px-5 py-3 text-left text-sm text-nm-text hover:bg-nm-surface first:rounded-t-[1.5rem] last:rounded-b-[1.5rem]"
               >
                 {suggestion}
               </button>
@@ -232,9 +215,9 @@ export function TagInput({
           {tags.map(tag => (
             <div
               key={tag}
-              className={`flex items-center gap-2 px-3 py-2 border rounded-xl ${tagColors[tagColor]}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full ${tagColors[tagColor]}`}
             >
-              <span className="text-sm font-medium">{tag}</span>
+              <span className="text-sm font-bold">{tag}</span>
               <button
                 onClick={() => removeTag(tag)}
                 className={tagRemoveColors[tagColor]}
@@ -258,12 +241,12 @@ interface SectionCardProps {
 
 export function SectionCard({ title, description, icon, children }: SectionCardProps) {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div className="bg-nm-surface rounded-[2rem] p-6">
       <div className="flex items-start gap-3 mb-4">
-        {icon && <div className="text-emerald-500 mt-0.5">{icon}</div>}
+        {icon && <div className="text-nm-signature mt-0.5">{icon}</div>}
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          {description && <p className="text-sm text-gray-500 mt-0.5">{description}</p>}
+          <h3 className="text-xl font-bold text-nm-text">{title}</h3>
+          {description && <p className="text-sm text-nm-text/60 mt-0.5">{description}</p>}
         </div>
       </div>
       {children}
@@ -283,12 +266,12 @@ export function SaveButton({ onClick, saving, saved, label = 'Save Changes' }: S
     <button
       onClick={onClick}
       disabled={saving}
-      className={`w-full py-4 px-8 rounded-2xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+      className={`w-full py-4 px-8 rounded-full font-bold transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 ${
         saved
-          ? 'bg-green-500 text-white'
+          ? 'bg-nm-success text-white'
           : saving
-          ? 'bg-gray-400 text-white cursor-not-allowed'
-          : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 active:scale-[0.98]'
+          ? 'bg-nm-surface-high text-nm-text/40 cursor-not-allowed'
+          : 'bg-gradient-to-br from-nm-signature to-nm-signature-light text-white shadow-nm-float'
       }`}
     >
       {saved ? (
@@ -311,45 +294,19 @@ interface ProgressRingProps {
   strokeWidth?: number;
 }
 
-export function ProgressRing({ percentage, size = 120, strokeWidth = 8 }: ProgressRingProps) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (percentage / 100) * circumference;
+export function ProgressRing({ percentage }: ProgressRingProps) {
+  const clamped = Math.max(0, Math.min(100, percentage));
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg className="transform -rotate-90" width={size} height={size}>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="#e5e7eb"
-          strokeWidth={strokeWidth}
-          fill="transparent"
+    <div className="flex flex-col items-center gap-2 min-w-[100px]">
+      <span className="text-3xl font-extrabold text-white">{clamped}%</span>
+      <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-white rounded-full transition-all duration-500"
+          style={{ width: `${clamped}%` }}
         />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="url(#gradient)"
-          strokeWidth={strokeWidth}
-          fill="transparent"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          className="transition-all duration-500"
-        />
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#10b981" />
-            <stop offset="100%" stopColor="#059669" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-gray-900">{percentage}%</span>
-        <span className="text-xs text-gray-500">Complete</span>
       </div>
+      <span className="text-xs text-white/70 font-medium">Complete</span>
     </div>
   );
 }

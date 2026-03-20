@@ -92,13 +92,13 @@ export function NutritionSummary({ meals, goals, date, onBack }: NutritionSummar
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wide transition-colors relative ${
                 activeTab === tab.id
-                  ? 'text-emerald-600'
+                  ? 'text-nm-signature'
                   : 'text-gray-400 hover:text-gray-600'
               }`}
             >
               {tab.label}
               {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-500 rounded-full" />
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-nm-bg0 rounded-full" />
               )}
             </button>
           ))}

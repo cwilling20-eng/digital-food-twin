@@ -82,37 +82,41 @@ export function MealItem({ meal, onDelete, onTap }: MealItemProps) {
   }, [isRevealed, closeSwipe, onTap, meal]);
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden rounded-[2rem]">
+      {/* Swipe-to-delete background */}
       <div className="absolute inset-y-0 right-0 flex items-stretch" style={{ width: DELETE_WIDTH }}>
         <button
           onClick={() => onDelete(meal)}
-          className="w-full flex items-center justify-center bg-red-500 hover:bg-red-600 transition-colors"
+          className="w-full flex items-center justify-center bg-nm-signature hover:opacity-90 transition-opacity rounded-r-[2rem]"
         >
           <Trash2 className="w-5 h-5 text-white" />
         </button>
       </div>
 
+      {/* Card content */}
       <div
-        className={`relative bg-white flex items-center justify-between px-4 py-3 ${transitioning ? 'transition-transform duration-200 ease-out' : ''}`}
+        className={`relative bg-nm-surface rounded-[2rem] px-6 py-5 ${transitioning ? 'transition-transform duration-200 ease-out' : ''}`}
         style={{ transform: `translateX(${offsetX}px)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onClick={handleTap}
       >
-        <div className="flex-1 min-w-0 cursor-pointer">
-          <p className="text-sm text-gray-800 truncate">{meal.meal_name}</p>
-          {(meal.protein_g || meal.carbs_g || meal.fat_g) && (
-            <p className="text-[11px] text-gray-400 mt-0.5">
-              {meal.protein_g ? `P ${Math.round(meal.protein_g)}g` : ''}
-              {meal.carbs_g ? ` · C ${Math.round(meal.carbs_g)}g` : ''}
-              {meal.fat_g ? ` · F ${Math.round(meal.fat_g)}g` : ''}
-            </p>
-          )}
+        <div className="flex items-center justify-between cursor-pointer">
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-lg text-nm-text truncate">{meal.meal_name}</p>
+            {(meal.protein_g || meal.carbs_g || meal.fat_g) && (
+              <p className="text-sm text-nm-text/60 mt-1">
+                {meal.protein_g ? `P ${Math.round(meal.protein_g)}g` : ''}
+                {meal.carbs_g ? ` · C ${Math.round(meal.carbs_g)}g` : ''}
+                {meal.fat_g ? ` · F ${Math.round(meal.fat_g)}g` : ''}
+              </p>
+            )}
+          </div>
+          <span className="text-nm-signature font-bold text-lg ml-4 flex-shrink-0">
+            {meal.estimated_calories ? `${meal.estimated_calories}` : '--'}
+          </span>
         </div>
-        <span className="text-sm font-medium text-gray-600 ml-3 flex-shrink-0">
-          {meal.estimated_calories ? `${meal.estimated_calories}` : '--'}
-        </span>
       </div>
     </div>
   );

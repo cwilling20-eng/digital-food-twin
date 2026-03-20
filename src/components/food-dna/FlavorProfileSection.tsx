@@ -183,8 +183,8 @@ export function FlavorProfileSection({
                     onClick={() => updateField('portionPreference', portion)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium border-2 transition-all ${
                       localData.portionPreference === portion
-                        ? 'bg-emerald-500 text-white border-emerald-500'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-300'
+                        ? 'bg-nm-bg0 text-white border-nm-bg0'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-nm-surface-highest'
                     }`}
                   >
                     {portion}

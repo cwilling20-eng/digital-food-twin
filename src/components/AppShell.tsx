@@ -1,5 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { BottomNav } from './BottomNav';
+import { NavBar } from './ui/NavBar';
+import { AppHeader } from './ui/AppHeader';
 import { QuickAddModal } from './diary/QuickAddModal';
 import { ErrorToast } from './ui/Toast';
 import { useUI } from '../contexts/UIContext';
@@ -8,6 +9,7 @@ import { useMeals } from '../hooks/useMeals';
 import type { Screen } from '../types';
 
 const HIDE_NAV_PATHS = ['/onboarding', '/swipe', '/nutrition'];
+const HIDE_HEADER_PATHS = ['/onboarding', '/swipe', '/nutrition'];
 
 export function AppShell() {
   const location = useLocation();
@@ -17,13 +19,20 @@ export function AppShell() {
   const { addMeal } = useMeals(userId);
 
   const showNav = !HIDE_NAV_PATHS.includes(location.pathname);
+  const showHeader = !HIDE_HEADER_PATHS.includes(location.pathname);
 
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen">
+    <div className="max-w-md mx-auto bg-nm-bg min-h-screen">
+      {showHeader && (
+        <AppHeader
+          onAvatarClick={() => navigate('/profile')}
+          onNotificationClick={() => {/* TODO: notifications */}}
+        />
+      )}
       <Outlet />
 
       {showNav && (
-        <BottomNav
+        <NavBar
           currentScreen={pathnameToScreen(location.pathname) as Screen}
           onNavigate={(screen) => navigate(screenToPath(screen))}
           onQuickAdd={() => {

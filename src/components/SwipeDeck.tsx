@@ -149,15 +149,15 @@ export function SwipeDeck({ foods, onSwipe, onComplete, onBack }: SwipeDeckProps
 
   if (showCompletion || (!currentFood && currentIndex >= total)) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-b from-nm-bg to-white flex items-center justify-center p-6">
         <div className="text-center">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <Heart className="w-10 h-10 text-emerald-600" />
+          <div className="w-20 h-20 bg-nm-surface rounded-full flex items-center justify-center mx-auto mb-5">
+            <Heart className="w-10 h-10 text-nm-signature" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">All Done!</h2>
           <p className="text-gray-500">Building your taste profile...</p>
           <div className="mt-6">
-            <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-8 h-8 border-3 border-nm-bg0 border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         </div>
       </div>
@@ -166,10 +166,10 @@ export function SwipeDeck({ foods, onSwipe, onComplete, onBack }: SwipeDeckProps
 
   if (!currentFood) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-b from-nm-bg to-white flex items-center justify-center p-6">
         <div className="text-center">
           <p className="text-gray-500 mb-4">No foods to show</p>
-          <button onClick={handleSkip} className="text-emerald-600 font-medium">
+          <button onClick={handleSkip} className="text-nm-signature font-medium">
             Continue to Dashboard
           </button>
         </div>
@@ -191,7 +191,7 @@ export function SwipeDeck({ foods, onSwipe, onComplete, onBack }: SwipeDeckProps
   const isAllergen = currentFood.id.startsWith('allergen-');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-nm-bg to-white flex flex-col">
       <div className="px-6 pt-6 pb-4">
         <div className="flex items-center justify-between mb-4">
           <button
@@ -214,7 +214,7 @@ export function SwipeDeck({ foods, onSwipe, onComplete, onBack }: SwipeDeckProps
 
         <div className="w-full bg-gray-200 rounded-full h-1.5">
           <div
-            className="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
+            className="bg-nm-bg0 h-1.5 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -253,7 +253,7 @@ export function SwipeDeck({ foods, onSwipe, onComplete, onBack }: SwipeDeckProps
               <FoodImage src={currentFood.image_url} alt={currentFood.name} />
 
               <div
-                className="absolute inset-0 bg-emerald-500 flex items-center justify-center transition-opacity pointer-events-none"
+                className="absolute inset-0 bg-nm-bg0 flex items-center justify-center transition-opacity pointer-events-none"
                 style={{ opacity: likeOpacity * 0.8 }}
               >
                 <Heart className="w-24 h-24 text-white" fill="white" />
@@ -278,7 +278,7 @@ export function SwipeDeck({ foods, onSwipe, onComplete, onBack }: SwipeDeckProps
                     className={`px-3 py-1 text-sm font-medium rounded-full ${
                       isAllergen
                         ? 'bg-amber-50 text-amber-700'
-                        : 'bg-emerald-50 text-emerald-700'
+                        : 'bg-nm-bg text-nm-text'
                     }`}
                   >
                     {tag}
@@ -303,7 +303,7 @@ export function SwipeDeck({ foods, onSwipe, onComplete, onBack }: SwipeDeckProps
           <button
             onClick={() => advanceCard(true)}
             disabled={isAnimating}
-            className="w-20 h-20 bg-emerald-500 rounded-full shadow-lg shadow-emerald-500/30 flex items-center justify-center hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50"
+            className="w-20 h-20 bg-nm-bg0 rounded-full shadow-lg shadow-nm-bg0/30 flex items-center justify-center hover:bg-nm-signature transition-all active:scale-95 disabled:opacity-50"
           >
             <Heart className="w-10 h-10 text-white" fill="white" />
           </button>
