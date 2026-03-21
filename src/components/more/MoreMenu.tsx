@@ -1,7 +1,11 @@
-import { ClipboardList, Dna, Target, TrendingUp, MessageCircle, Settings, Info, ChevronRight, LogOut, User } from 'lucide-react';
+import { useState } from 'react';
+import { ClipboardList, Dna, Target, TrendingUp, MessageCircle, Settings, Info, ChevronRight, LogOut, User, Camera } from 'lucide-react';
 import type { Screen } from '../../types';
+import { ProfileSetupModal } from '../friends/ProfileSetupModal';
+import { usePublicProfile } from '../../hooks/usePublicProfile';
 
 interface MoreMenuProps {
+  userId: string;
   userEmail: string;
   onNavigate: (screen: Screen) => void;
   onLogout: () => void;
@@ -90,21 +94,25 @@ const MENU_SECTIONS: { title: string; items: MenuItem[] }[] = [
   },
 ];
 
-export function MoreMenu({ userEmail, onNavigate, onLogout }: MoreMenuProps) {
-  const initials = userEmail
-    .split('@')[0]
-    .slice(0, 2)
-    .toUpperCase();
+export function MoreMenu({ userId, userEmail, onNavigate, onLogout }: MoreMenuProps) {
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const { publicProfile, loadProfile } = usePublicProfile(userId);
+
+  const initials = (publicProfile?.displayName || userEmail.split('@')[0])
+    .split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
     <div className="min-h-screen bg-nm-bg pb-40">
       <div className="bg-nm-surface-lowest px-6 pt-12 pb-6">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => onNavigate('friends')}
-            className="w-14 h-14 bg-gradient-to-br from-nm-signature to-nm-signature-light rounded-full flex items-center justify-center shadow-nm-float active:scale-95 transition-transform"
+            onClick={() => setShowProfileSetup(true)}
+            className="relative w-14 h-14 bg-gradient-to-br from-nm-signature to-nm-signature-light rounded-full flex items-center justify-center shadow-nm-float active:scale-95 transition-transform"
           >
             <span className="text-lg font-bold text-white">{initials}</span>
+            <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-nm-surface-lowest rounded-full flex items-center justify-center shadow-sm">
+              <Camera className="w-3 h-3 text-nm-text/60" />
+            </div>
           </button>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-nm-text truncate">{userEmail.split('@')[0]}</h1>
@@ -158,6 +166,19 @@ export function MoreMenu({ userEmail, onNavigate, onLogout }: MoreMenuProps) {
           </button>
         </div>
       </div>
+
+      {/* TODO: Add Supabase Storage image upload when bucket is configured */}
+      {showProfileSetup && (
+        <ProfileSetupModal
+          userId={userId}
+          currentProfile={publicProfile}
+          onClose={() => setShowProfileSetup(false)}
+          onSave={() => {
+            setShowProfileSetup(false);
+            loadProfile();
+          }}
+        />
+      )}
     </div>
   );
 }

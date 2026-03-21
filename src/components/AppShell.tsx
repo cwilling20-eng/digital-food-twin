@@ -14,7 +14,7 @@ const HIDE_HEADER_PATHS = ['/onboarding', '/swipe', '/nutrition'];
 export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { showQuickAdd, setShowQuickAdd, errorMessage, showError, clearError } = useUI();
+  const { showQuickAdd, setShowQuickAdd, quickAddPrefill, clearQuickAddPrefill, errorMessage, showError, clearError } = useUI();
   const { userId } = useProfile();
   const { addMeal } = useMeals(userId);
 
@@ -26,7 +26,6 @@ export function AppShell() {
       {showHeader && (
         <AppHeader
           onAvatarClick={() => navigate('/profile')}
-          onNotificationClick={() => {/* TODO: notifications */}}
         />
       )}
       <Outlet />
@@ -49,6 +48,7 @@ export function AppShell() {
 
       {showQuickAdd && (
         <QuickAddModal
+          prefill={quickAddPrefill ?? undefined}
           onSave={async (data) => {
             const result = await addMeal({
               meal_name: data.meal_name,
@@ -66,8 +66,9 @@ export function AppShell() {
               return;
             }
             setShowQuickAdd(false);
+            clearQuickAddPrefill();
           }}
-          onClose={() => setShowQuickAdd(false)}
+          onClose={() => { setShowQuickAdd(false); clearQuickAddPrefill(); }}
         />
       )}
     </div>

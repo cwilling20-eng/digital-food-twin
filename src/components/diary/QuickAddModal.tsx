@@ -6,8 +6,17 @@ import { fetchNutritionEstimate, type NutritionEstimate } from '../../utils/nutr
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 type Feeling = 'Energized' | 'Satisfied' | 'Bloated' | 'Regret' | 'Hungry';
 
+interface QuickAddPrefill {
+  mealName: string;
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+}
+
 interface QuickAddModalProps {
   defaultMealType?: MealType;
+  prefill?: QuickAddPrefill;
   onSave: (data: {
     meal_name: string;
     meal_type: MealType;
@@ -37,8 +46,8 @@ const FEELINGS: { label: Feeling; emoji: string }[] = [
   { label: 'Hungry', emoji: '🤤' }
 ];
 
-export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModalProps) {
-  const [mealName, setMealName] = useState('');
+export function QuickAddModal({ defaultMealType, prefill, onSave, onClose }: QuickAddModalProps) {
+  const [mealName, setMealName] = useState(prefill?.mealName ?? '');
   const [selectedMealType, setSelectedMealType] = useState<MealType>(defaultMealType || 'lunch');
   const [selectedFeeling, setSelectedFeeling] = useState<Feeling | null>(null);
   const [notes, setNotes] = useState('');
@@ -110,6 +119,15 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
           {/* Quantity, unit, estimation, manual override — shared component */}
           <MealNutritionInput
             mealName={mealName}
+            initialNutrition={prefill?.calories != null ? {
+              calories: prefill.calories,
+              protein_g: prefill.protein ?? 0,
+              carbs_g: prefill.carbs ?? 0,
+              fat_g: prefill.fat ?? 0,
+              fiber_g: 0,
+              sugar_g: 0,
+              sodium_mg: 0,
+            } : undefined}
             onChange={handleNutritionChange}
           />
 

@@ -4,10 +4,11 @@ import { MoreMenu } from '../components/more/MoreMenu';
 
 export function ProfileRoute() {
   const navigate = useNavigate();
-  const { userEmail, handleLogout } = useProfile();
+  const { userId, userEmail, handleLogout } = useProfile();
 
   return (
     <MoreMenu
+      userId={userId}
       userEmail={userEmail}
       onNavigate={(screen) => {
         const map: Record<string, string> = {

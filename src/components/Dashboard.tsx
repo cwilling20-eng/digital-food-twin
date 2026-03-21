@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useApp } from '../contexts/AppContext';
+import { useUI } from '../contexts/UIContext';
 import { useMeals } from '../hooks/useMeals';
 import { useWaterLogs } from '../hooks/useWaterLogs';
 import { useFriends } from '../hooks/useFriends';
@@ -290,6 +291,7 @@ function RestaurantFinderSheet({
 
 export function Dashboard({ userId, userEmail, onNavigate, onScan: _onScan, onFindRestaurant }: DashboardProps) {
   const { nutritionGoals } = useApp();
+  const { openQuickAddWith } = useUI();
   const [nutritionData, setNutritionData] = useState<NutritionData>({ calories: 0, protein: 0, carbs: 0, fat: 0, water: 0 });
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
@@ -525,7 +527,13 @@ export function Dashboard({ userId, userEmail, onNavigate, onScan: _onScan, onFi
           badges={['420 kcal', 'High Protein']}
           ctaLabel="Log this Nom"
           onCtaClick={() => {
-            onNavigate('diary');
+            openQuickAddWith({
+              mealName: 'Miso-Glazed Salmon Bowl',
+              calories: 420,
+              protein: 38,
+              carbs: 42,
+              fat: 12,
+            });
           }}
         />
       </section>
