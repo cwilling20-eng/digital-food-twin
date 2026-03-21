@@ -51,12 +51,12 @@ export function NomMigoCard({
 
         {/* Stitch: flex gap-4. Image: w-32 h-32 rounded-lg. Text: flex flex-col justify-between py-1 */}
         <div className="flex gap-4">
-          <div className="w-32 h-32 rounded-[2rem] overflow-hidden shrink-0 bg-white/10">
+          <div className="w-32 h-32 rounded-[2rem] overflow-hidden shrink-0 bg-nm-surface-high/20">
             {imageUrl ? (
               <img src={imageUrl} alt={imageAlt || dishName} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="material-symbols-outlined text-4xl text-white/20">restaurant</span>
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-nm-signature/10 to-nm-accent/10">
+                <span className="text-5xl opacity-20">😋</span>
               </div>
             )}
           </div>

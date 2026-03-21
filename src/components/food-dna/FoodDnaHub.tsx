@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   ArrowLeft,
   ShieldAlert,
@@ -127,7 +127,15 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
     await refreshProfile();
   }, [saveFoodDislikes, refreshProfile]);
 
-  if (loading) {
+  // Loading timeout — if data doesn't load after 5s, show the page anyway with defaults
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => setTimedOut(true), 5000);
+    return () => clearTimeout(t);
+  }, [loading]);
+
+  if (loading && !timedOut) {
     return (
       <div className="min-h-screen bg-nm-bg flex items-center justify-center">
         <div className="text-center">

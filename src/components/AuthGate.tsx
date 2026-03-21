@@ -5,8 +5,11 @@ import { AuthScreen } from './AuthScreen';
 
 function Spinner() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-nm-bg to-white flex items-center justify-center">
-      <div className="w-8 h-8 border-3 border-nm-bg0 border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-nm-bg flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-5xl mb-4">😋</div>
+        <div className="w-8 h-8 border-3 border-nm-signature border-t-transparent rounded-full animate-spin mx-auto" />
+      </div>
     </div>
   );
 }

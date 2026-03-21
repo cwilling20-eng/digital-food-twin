@@ -78,7 +78,10 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
   const { errorMessage, showError, clearError } = useErrorToast();
 
   const fetchData = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     await Promise.all([
       fetchMealsForDate(selectedDate),
@@ -319,13 +322,17 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
           />
 
           {meals.length === 0 && (
-            <div className="text-center py-6">
-              <p className="text-nm-text/40 text-sm">No food logged {isToday ? 'today' : 'for this day'}.</p>
+            <div className="text-center py-10">
+              <div className="text-6xl opacity-15 mb-4">😋</div>
+              <p className="text-nm-text/50 text-base font-medium mb-1">
+                {isToday ? 'No meals logged yet' : 'Nothing logged for this day'}
+              </p>
+              <p className="text-nm-text/30 text-sm mb-4">Tap + to log your first nom!</p>
               <button
                 onClick={onOpenQuickAdd}
-                className="mt-2 text-nm-signature font-bold text-sm hover:opacity-80 transition-opacity"
+                className="px-6 py-3 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white font-bold rounded-full shadow-nm-float active:scale-95 transition-transform"
               >
-                Log your first meal
+                Log a Meal
               </button>
             </div>
           )}

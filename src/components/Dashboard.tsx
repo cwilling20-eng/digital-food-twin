@@ -143,7 +143,7 @@ function RestaurantFinderSheet({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[60]">
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
@@ -525,7 +525,7 @@ export function Dashboard({ userId, userEmail, onNavigate, onScan: _onScan, onFi
           badges={['420 kcal', 'High Protein']}
           ctaLabel="Log this Nom"
           onCtaClick={() => {
-            // TODO: Log the AI-recommended meal
+            onNavigate('diary');
           }}
         />
       </section>

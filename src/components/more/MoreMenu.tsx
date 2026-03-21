@@ -97,21 +97,24 @@ export function MoreMenu({ userEmail, onNavigate, onLogout }: MoreMenuProps) {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-40">
-      <div className="bg-white px-6 pt-12 pb-6 shadow-sm">
+    <div className="min-h-screen bg-nm-bg pb-40">
+      <div className="bg-nm-surface-lowest px-6 pt-12 pb-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-nm-signature to-nm-signature rounded-full flex items-center justify-center shadow-md shadow-nm-bg0/20">
+          <button
+            onClick={() => onNavigate('friends')}
+            className="w-14 h-14 bg-gradient-to-br from-nm-signature to-nm-signature-light rounded-full flex items-center justify-center shadow-nm-float active:scale-95 transition-transform"
+          >
             <span className="text-lg font-bold text-white">{initials}</span>
-          </div>
+          </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-gray-900 truncate">{userEmail.split('@')[0]}</h1>
-            <p className="text-sm text-gray-500 truncate">{userEmail}</p>
+            <h1 className="text-xl font-bold text-nm-text truncate">{userEmail.split('@')[0]}</h1>
+            <p className="text-sm text-nm-text/60 truncate">{userEmail}</p>
           </div>
           <button
             onClick={() => onNavigate('food-dna')}
-            className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+            className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-nm-surface hover:bg-nm-surface-high transition-colors"
           >
-            <User className="w-4 h-4 text-gray-600" />
+            <User className="w-4 h-4 text-nm-text/60" />
           </button>
         </div>
       </div>
