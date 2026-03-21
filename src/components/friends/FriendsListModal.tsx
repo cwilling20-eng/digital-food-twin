@@ -105,7 +105,7 @@ export function FriendsListModal({
           </div>
         </div>
 
-        <div className="px-6 pb-8 space-y-5">
+        <div className="px-6 pb-40 space-y-5">
           {/* Search/QR toggle */}
           <div className="flex p-1.5 bg-nm-surface-high rounded-full">
             <button
