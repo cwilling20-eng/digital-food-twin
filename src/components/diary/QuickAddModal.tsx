@@ -1,22 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Loader2, Utensils } from 'lucide-react';
-
-import { WEBHOOK_NUTRITION_URL } from '../../config/api';
+import { X, Loader2, Utensils, Check, RefreshCw } from 'lucide-react';
+import { fetchNutritionEstimate, type NutritionEstimate } from '../../utils/nutritionCache';
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 type Feeling = 'Energized' | 'Satisfied' | 'Bloated' | 'Regret' | 'Hungry';
-
-interface NutritionEstimate {
-  calories: number;
-  protein_g: number;
-  carbs_g: number;
-  fat_g: number;
-  fiber_g: number;
-  sugar_g: number;
-  sodium_mg: number;
-  confidence: 'low' | 'medium' | 'high';
-  notes: string;
-}
 
 interface QuickAddModalProps {
   defaultMealType?: MealType;
@@ -53,41 +40,9 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
   const [isSaving, setIsSaving] = useState(false);
   const [nutritionEstimate, setNutritionEstimate] = useState<NutritionEstimate | null>(null);
   const [isEstimatingNutrition, setIsEstimatingNutrition] = useState(false);
+  // Track which meal name the current estimate was fetched for
+  const [estimatedForName, setEstimatedForName] = useState('');
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  const estimateNutrition = useCallback(async (meal: string) => {
-    if (!meal.trim() || meal.length < 3) {
-      setNutritionEstimate(null);
-      return;
-    }
-
-    setIsEstimatingNutrition(true);
-    try {
-      const response = await fetch(WEBHOOK_NUTRITION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meal_name: meal.trim() })
-      });
-      if (!response.ok) throw new Error('Failed to estimate nutrition');
-      const data = await response.json();
-      const nutrition = Array.isArray(data) ? data[0] : data;
-      setNutritionEstimate(nutrition);
-    } catch {
-      setNutritionEstimate(null);
-    } finally {
-      setIsEstimatingNutrition(false);
-    }
-  }, []);
-
-  const handleMealNameChange = (value: string) => {
-    setMealName(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!value.trim()) {
-      setNutritionEstimate(null);
-      return;
-    }
-    debounceRef.current = setTimeout(() => estimateNutrition(value), 500);
-  };
 
   useEffect(() => {
     return () => {
@@ -95,30 +50,76 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
     };
   }, []);
 
+  // Whether the displayed estimate is stale (user changed text since last fetch)
+  const isStale = nutritionEstimate != null && mealName.trim().toLowerCase() !== estimatedForName.toLowerCase();
+
+  const doEstimate = useCallback(async (name?: string) => {
+    const target = (name ?? mealName).trim();
+    if (!target || target.length < 3) return;
+
+    // Clear any pending debounce
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+
+    setIsEstimatingNutrition(true);
+    const result = await fetchNutritionEstimate(target);
+    if (result) {
+      setNutritionEstimate(result);
+      setEstimatedForName(target);
+    }
+    setIsEstimatingNutrition(false);
+  }, [mealName]);
+
+  // Debounced estimate trigger (1500ms safety net for blur/enter)
+  const triggerEstimateDebounced = useCallback((name: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => doEstimate(name), 1500);
+  }, [doEstimate]);
+
+  const handleMealNameChange = (value: string) => {
+    setMealName(value);
+    // Do NOT trigger estimation on keystroke — only clear if empty
+    if (!value.trim()) {
+      setNutritionEstimate(null);
+      setEstimatedForName('');
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    }
+  };
+
+  const handleInputBlur = () => {
+    const trimmed = mealName.trim();
+    if (trimmed.length >= 3 && trimmed.toLowerCase() !== estimatedForName.toLowerCase()) {
+      triggerEstimateDebounced(trimmed);
+    }
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const trimmed = mealName.trim();
+      if (trimmed.length >= 3) {
+        triggerEstimateDebounced(trimmed);
+      }
+    }
+  };
+
   const handleSave = async () => {
     if (!mealName.trim() || !selectedFeeling) return;
     setIsSaving(true);
     try {
       let nutrition = nutritionEstimate;
-      if (!nutrition) {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
+      // If no estimate yet (user skipped), fetch one now
+      if (!nutrition || isStale) {
         setIsEstimatingNutrition(true);
-        try {
-          const response = await fetch(WEBHOOK_NUTRITION_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ meal_name: mealName.trim() })
-          });
-          if (response.ok) {
-            const data = await response.json();
-            nutrition = Array.isArray(data) ? data[0] : data;
-            setNutritionEstimate(nutrition);
-          }
-        } catch {
-          // proceed without estimate
-        } finally {
-          setIsEstimatingNutrition(false);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        nutrition = await fetchNutritionEstimate(mealName.trim());
+        if (nutrition) {
+          setNutritionEstimate(nutrition);
+          setEstimatedForName(mealName.trim());
         }
+        setIsEstimatingNutrition(false);
       }
       await onSave({
         meal_name: mealName.trim(),
@@ -153,23 +154,45 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
         </div>
 
         <div className="px-8 pb-8 space-y-6">
-          {/* Meal name input — pill-shaped */}
+          {/* Meal name input + estimate button */}
           <div>
             <label htmlFor="qa-meal-name" className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">What did you eat?</label>
-            <input
-              id="qa-meal-name"
-              type="text"
-              value={mealName}
-              onChange={(e) => handleMealNameChange(e.target.value)}
-              placeholder="e.g., Grilled Chicken Salad"
-              autoFocus
-              className="w-full px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
-            />
+            <div className="flex gap-2">
+              <input
+                id="qa-meal-name"
+                type="text"
+                value={mealName}
+                onChange={(e) => handleMealNameChange(e.target.value)}
+                onBlur={handleInputBlur}
+                onKeyDown={handleInputKeyDown}
+                placeholder="e.g., Grilled Chicken Salad"
+                autoFocus
+                className="flex-1 px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
+              />
+              <button
+                onClick={() => doEstimate()}
+                disabled={!mealName.trim() || mealName.trim().length < 3 || isEstimatingNutrition}
+                className="px-4 py-3.5 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white font-bold text-sm rounded-full disabled:opacity-30 active:scale-95 transition-all flex items-center gap-1.5 flex-shrink-0"
+              >
+                {isEstimatingNutrition ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Estimate
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Nutrition estimate preview */}
-          {mealName.trim() && (isEstimatingNutrition || nutritionEstimate) && (
-            <div className="bg-nm-surface rounded-[2rem] p-6">
+          {(isEstimatingNutrition || nutritionEstimate) && (
+            <div className={`rounded-[2rem] p-6 transition-all ${
+              isStale
+                ? 'bg-nm-surface-high/50 opacity-60'
+                : 'bg-nm-surface'
+            }`}>
               {isEstimatingNutrition ? (
                 <div className="flex items-center gap-2 text-nm-text">
                   <Loader2 className="w-4 h-4 animate-spin text-nm-signature" />
@@ -178,10 +201,19 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
               ) : nutritionEstimate && (
                 <>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-nm-label-md text-nm-text/40 uppercase tracking-wider">Estimated Nutrition</span>
-                    <span className={`text-nm-label-md px-3 py-1 rounded-full font-bold ${confidenceColors[nutritionEstimate.confidence]}`}>
-                      {nutritionEstimate.confidence}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {!isStale && (
+                        <Check className="w-4 h-4 text-nm-success" />
+                      )}
+                      <span className="text-nm-label-md text-nm-text/40 uppercase tracking-wider">
+                        {isStale ? 'Stale estimate — tap Estimate to refresh' : 'Estimated Nutrition'}
+                      </span>
+                    </div>
+                    {nutritionEstimate.confidence && !isStale && (
+                      <span className={`text-nm-label-md px-3 py-1 rounded-full font-bold ${confidenceColors[nutritionEstimate.confidence]}`}>
+                        {nutritionEstimate.confidence}
+                      </span>
+                    )}
                   </div>
                   <div className="grid grid-cols-4 gap-3">
                     <div className="text-center">
@@ -264,7 +296,7 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
           {/* CTA — coral gradient pill */}
           <button
             onClick={handleSave}
-            disabled={!mealName.trim() || !selectedFeeling || isSaving || isEstimatingNutrition}
+            disabled={!mealName.trim() || !selectedFeeling || isSaving}
             className="w-full py-4 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white font-bold rounded-full shadow-nm-float transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100 flex items-center justify-center gap-2"
           >
             {isSaving ? (
@@ -275,7 +307,7 @@ export function QuickAddModal({ defaultMealType, onSave, onClose }: QuickAddModa
             ) : (
               <>
                 Log Food
-                {nutritionEstimate && (
+                {nutritionEstimate && !isStale && (
                   <span className="text-white/70 font-normal">
                     ({nutritionEstimate.calories} cal)
                   </span>

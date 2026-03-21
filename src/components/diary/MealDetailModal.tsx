@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Trash2, Loader2, Pencil, Check } from 'lucide-react';
-import { WEBHOOK_NUTRITION_URL } from '../../config/api';
+import { fetchNutritionEstimate } from '../../utils/nutritionCache';
 import { MacroPills } from '../ui/MacroPills';
 import type { MealLogEntry } from '../../types';
 
@@ -9,16 +9,6 @@ interface MealDetailModalProps {
   onUpdate: (id: string, updates: Partial<MealLogEntry>) => Promise<void>;
   onDelete: (meal: MealLogEntry) => void;
   onClose: () => void;
-}
-
-interface NutritionEstimate {
-  calories: number;
-  protein_g: number;
-  carbs_g: number;
-  fat_g: number;
-  fiber_g: number;
-  sugar_g: number;
-  sodium_mg: number;
 }
 
 export function MealDetailModal({ meal, onUpdate, onDelete, onClose }: MealDetailModalProps) {
@@ -35,30 +25,6 @@ export function MealDetailModal({ meal, onUpdate, onDelete, onClose }: MealDetai
     }
   }, [isEditing]);
 
-  const estimateNutrition = useCallback(async (name: string): Promise<NutritionEstimate | null> => {
-    try {
-      const response = await fetch(WEBHOOK_NUTRITION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meal_description: name })
-      });
-      if (!response.ok) return null;
-      const data = await response.json();
-      const output = typeof data.output === 'string' ? JSON.parse(data.output) : data.output || data;
-      return {
-        calories: output.calories ?? output.estimated_calories ?? 0,
-        protein_g: output.protein_g ?? 0,
-        carbs_g: output.carbs_g ?? 0,
-        fat_g: output.fat_g ?? 0,
-        fiber_g: output.fiber_g ?? 0,
-        sugar_g: output.sugar_g ?? 0,
-        sodium_mg: output.sodium_mg ?? 0,
-      };
-    } catch {
-      return null;
-    }
-  }, []);
-
   const handleSaveEdit = async () => {
     if (!editName.trim() || editName.trim() === meal.meal_name) {
       setIsEditing(false);
@@ -69,7 +35,7 @@ export function MealDetailModal({ meal, onUpdate, onDelete, onClose }: MealDetai
     setIsSaving(true);
     setIsReEstimating(true);
 
-    const nutrition = await estimateNutrition(editName.trim());
+    const nutrition = await fetchNutritionEstimate(editName.trim());
 
     const updates: Partial<MealLogEntry> = {
       meal_name: editName.trim(),

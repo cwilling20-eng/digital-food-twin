@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ArrowLeft, Send, Loader2, ClipboardList, X, MapPin, AlertCircle, Wifi, WifiOff, Utensils, Users, UserPlus } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, ClipboardList, X, MapPin, AlertCircle, Wifi, WifiOff, Utensils, Users, UserPlus, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useGeolocation, type GeoLocation, type LocationStatus } from '../hooks/useGeolocation';
 import { useApp } from '../contexts/AppContext';
@@ -8,7 +8,8 @@ import { useMeals } from '../hooks/useMeals';
 import { useFriends } from '../hooks/useFriends';
 import { fetchUserFoodDNA, type UserFoodDNA } from '../utils/fetchUserFoodDNA';
 import type { ComprehensiveUserProfile, DiningContext, FriendFoodDna } from '../types';
-import { WEBHOOK_CHAT_URL, WEBHOOK_NUTRITION_URL } from '../config/api';
+import { WEBHOOK_CHAT_URL } from '../config/api';
+import { fetchNutritionEstimate, type NutritionEstimate as CachedNutritionEstimate } from '../utils/nutritionCache';
 import { Toast, useErrorToast } from './ui/Toast';
 import { ChatResultCard, parseMenuRecommendations } from './ui/ChatResultCard';
 
@@ -418,56 +419,27 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
     return null;
   }, []);
 
-  // Debounced nutrition estimation
-  const estimateNutrition = useCallback(async (meal: string) => {
+  // Nutrition estimation — uses centralized cache, no keystroke triggers
+  const estimateNutritionForModal = useCallback(async (meal: string) => {
     if (!meal.trim() || meal.length < 3) {
       setNutritionEstimate(null);
       return;
     }
 
     setIsEstimatingNutrition(true);
-
-    try {
-      const response = await fetch(WEBHOOK_NUTRITION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meal_name: meal.trim() })
-      });
-
-      if (!response.ok) throw new Error('Failed to estimate nutrition');
-
-      const data = await response.json();
-      
-      // Handle array response (n8n sometimes wraps in array)
-      const nutrition = Array.isArray(data) ? data[0] : data;
-      setNutritionEstimate(nutrition);
-    } catch (error) {
-      console.error('Nutrition estimation error:', error);
-      setNutritionEstimate(null);
-    } finally {
-      setIsEstimatingNutrition(false);
+    const result = await fetchNutritionEstimate(meal.trim());
+    if (result) {
+      setNutritionEstimate(result as NutritionEstimate);
     }
+    setIsEstimatingNutrition(false);
   }, []);
 
-  // Handle meal name changes with debounce
+  // Handle meal name changes — no auto-estimation, just update state
   const handleMealNameChange = (value: string) => {
     setMealName(value);
-    
-    // Clear previous debounce
-    if (nutritionDebounceRef.current) {
-      clearTimeout(nutritionDebounceRef.current);
-    }
-
-    // Reset nutrition if cleared
     if (!value.trim()) {
       setNutritionEstimate(null);
-      return;
     }
-
-    // Debounce nutrition estimation (500ms)
-    nutritionDebounceRef.current = setTimeout(() => {
-      estimateNutrition(value);
-    }, 500);
   };
 
   // Cleanup debounce on unmount
@@ -683,19 +655,31 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
     setIsSaving(true);
 
     try {
+      // Fetch estimate if we don't have one yet
+      let nutrition = nutritionEstimate;
+      if (!nutrition) {
+        setIsEstimatingNutrition(true);
+        const fetched = await fetchNutritionEstimate(mealName.trim());
+        if (fetched) {
+          nutrition = fetched as NutritionEstimate;
+          setNutritionEstimate(nutrition);
+        }
+        setIsEstimatingNutrition(false);
+      }
+
       const result = await addMeal({
         meal_name: mealName.trim(),
         feeling: selectedFeeling,
         notes: notes.trim() || null,
         meal_type: selectedMealType || getMealTypeFromTime(),
-        nutrition: nutritionEstimate ? {
-          calories: nutritionEstimate.calories,
-          protein_g: nutritionEstimate.protein_g,
-          carbs_g: nutritionEstimate.carbs_g,
-          fat_g: nutritionEstimate.fat_g,
-          fiber_g: nutritionEstimate.fiber_g,
-          sugar_g: nutritionEstimate.sugar_g,
-          sodium_mg: nutritionEstimate.sodium_mg,
+        nutrition: nutrition ? {
+          calories: nutrition.calories,
+          protein_g: nutrition.protein_g,
+          carbs_g: nutrition.carbs_g,
+          fat_g: nutrition.fat_g,
+          fiber_g: nutrition.fiber_g,
+          sugar_g: nutrition.sugar_g,
+          sodium_mg: nutrition.sodium_mg,
         } : null,
       });
 
@@ -1006,19 +990,46 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
             </div>
 
             <div className="px-8 pb-8 space-y-5">
-              {/* Meal Name Input */}
+              {/* Meal Name Input + Estimate button */}
               <div>
                 <label htmlFor="meal-name" className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">
                   What did you eat?
                 </label>
-                <input
-                  id="meal-name"
-                  type="text"
-                  value={mealName}
-                  onChange={(e) => handleMealNameChange(e.target.value)}
-                  placeholder="e.g., Spicy Thai Basil Chicken with Rice"
-                  className="w-full px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
-                />
+                <div className="flex gap-2">
+                  <input
+                    id="meal-name"
+                    type="text"
+                    value={mealName}
+                    onChange={(e) => handleMealNameChange(e.target.value)}
+                    onBlur={() => {
+                      if (mealName.trim().length >= 3 && !nutritionEstimate) {
+                        estimateNutritionForModal(mealName);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (mealName.trim().length >= 3) estimateNutritionForModal(mealName);
+                      }
+                    }}
+                    placeholder="e.g., Spicy Thai Basil Chicken with Rice"
+                    className="flex-1 px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
+                  />
+                  <button
+                    onClick={() => estimateNutritionForModal(mealName)}
+                    disabled={!mealName.trim() || mealName.trim().length < 3 || isEstimatingNutrition}
+                    className="px-4 py-3.5 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white font-bold text-sm rounded-full disabled:opacity-30 active:scale-95 transition-all flex items-center gap-1.5 flex-shrink-0"
+                  >
+                    {isEstimatingNutrition ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        Estimate
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Nutrition Preview */}
