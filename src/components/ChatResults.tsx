@@ -126,10 +126,6 @@ function LocationIndicator({ status, location }: { status: LocationStatus; locat
   );
 }
 
-// NutritionPreview removed — replaced by MealNutritionInput shared component
-  );
-}
-
 export function ChatResults({ initialAnalysis, userProfile, userId, onBack, diningContext, autoMessage, onLogMeal }: ChatResultsProps) {
   const { nutritionGoals, bodyMetrics } = useApp();
   const { user } = useAuth();
