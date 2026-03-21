@@ -10,6 +10,7 @@ import { fetchUserFoodDNA, type UserFoodDNA } from '../utils/fetchUserFoodDNA';
 import type { ComprehensiveUserProfile, DiningContext, FriendFoodDna } from '../types';
 import { WEBHOOK_CHAT_URL, WEBHOOK_NUTRITION_URL } from '../config/api';
 import { Toast, useErrorToast } from './ui/Toast';
+import { ChatResultCard, parseMenuRecommendations } from './ui/ChatResultCard';
 
 interface Message {
   id: string;
@@ -96,13 +97,13 @@ function LocationIndicator({ status, location }: { status: LocationStatus; locat
         return { icon: <Wifi className="w-4 h-4 animate-pulse" />, text: 'Network...', color: 'text-amber-500' };
       case 'success':
         if (location?.source === 'gps') {
-          return { icon: <MapPin className="w-4 h-4" />, text: 'GPS', color: 'text-nm-bg0' };
+          return { icon: <MapPin className="w-4 h-4" />, text: 'GPS', color: 'text-nm-success' };
         } else if (location?.source === 'network') {
-          return { icon: <Wifi className="w-4 h-4" />, text: 'Network', color: 'text-nm-bg0' };
+          return { icon: <Wifi className="w-4 h-4" />, text: 'Network', color: 'text-nm-success' };
         } else if (location?.source === 'ip_fallback') {
           return { icon: <Wifi className="w-4 h-4" />, text: 'Approximate', color: 'text-amber-500' };
         }
-        return { icon: <MapPin className="w-4 h-4" />, text: 'Located', color: 'text-nm-bg0' };
+        return { icon: <MapPin className="w-4 h-4" />, text: 'Located', color: 'text-nm-success' };
       case 'denied':
         return { icon: <WifiOff className="w-4 h-4" />, text: 'Denied', color: 'text-red-500' };
       case 'unavailable':
@@ -150,41 +151,41 @@ function NutritionPreview({
   if (!nutrition) return null;
 
   const confidenceColors = {
-    low: 'text-amber-600 bg-amber-50',
-    medium: 'text-nm-signature bg-nm-bg',
-    high: 'text-blue-600 bg-blue-50'
+    low: 'text-nm-accent bg-nm-accent/10',
+    medium: 'text-nm-signature bg-nm-signature/10',
+    high: 'text-nm-success bg-nm-success/10'
   };
 
   return (
-    <div className="bg-gradient-to-r from-nm-bg to-nm-bg rounded-xl p-4 border border-nm-surface">
+    <div className="bg-nm-surface rounded-[2rem] p-5">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-nm-text uppercase tracking-wide">Estimated Nutrition</span>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${confidenceColors[nutrition.confidence]}`}>
-          {nutrition.confidence} confidence
+        <span className="text-nm-label-md text-nm-text/40 uppercase tracking-wider">Estimated Nutrition</span>
+        <span className={`text-nm-label-md px-3 py-1 rounded-full font-bold ${confidenceColors[nutrition.confidence]}`}>
+          {nutrition.confidence}
         </span>
       </div>
-      
+
       <div className="grid grid-cols-4 gap-3">
         <div className="text-center">
-          <div className="text-2xl font-bold text-gray-900">{nutrition.calories}</div>
-          <div className="text-xs text-gray-500">Calories</div>
+          <div className="text-2xl font-black text-nm-text">{nutrition.calories}</div>
+          <div className="text-nm-label-md text-nm-text/40 uppercase">Cal</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600">{nutrition.protein_g}g</div>
-          <div className="text-xs text-gray-500">Protein</div>
+          <div className="text-2xl font-black text-nm-signature">{nutrition.protein_g}g</div>
+          <div className="text-nm-label-md text-nm-text/40 uppercase">Protein</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-amber-600">{nutrition.carbs_g}g</div>
-          <div className="text-xs text-gray-500">Carbs</div>
+          <div className="text-2xl font-black text-nm-accent">{nutrition.carbs_g}g</div>
+          <div className="text-nm-label-md text-nm-text/40 uppercase">Carbs</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-rose-600">{nutrition.fat_g}g</div>
-          <div className="text-xs text-gray-500">Fat</div>
+          <div className="text-2xl font-black text-nm-text/80">{nutrition.fat_g}g</div>
+          <div className="text-nm-label-md text-nm-text/40 uppercase">Fat</div>
         </div>
       </div>
 
       {nutrition.notes && (
-        <p className="text-xs text-gray-500 mt-3 italic">{nutrition.notes}</p>
+        <p className="text-nm-label-md text-nm-text/40 mt-3 italic">{nutrition.notes}</p>
       )}
     </div>
   );
@@ -786,6 +787,9 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
         >
           <ArrowLeft className="w-5 h-5 text-nm-text" />
         </button>
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-nm-signature to-nm-signature-light flex items-center justify-center text-white text-lg flex-shrink-0">
+          😋
+        </div>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-nm-text flex items-center gap-2">
             NomMigo
@@ -811,7 +815,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
       {/* Group Dining Banner */}
       {groupDining?.isGroupDining && groupDining.selectedFriendNames.length > 0 && (
-        <div className="bg-gradient-to-r from-nm-bg0 to-nm-bg0 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+        <div className="bg-gradient-to-r from-nm-signature to-nm-signature-light px-4 py-3 flex items-center gap-3 flex-shrink-0">
           <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
             <Users className="w-4 h-4 text-white" />
           </div>
@@ -850,41 +854,92 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 pb-44 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+        {/* Empty state — shown when only the default greeting exists */}
+        {messages.length <= 1 && !isTyping && (
+          <div className="flex flex-col items-center justify-center py-12 select-none">
+            <div className="text-8xl opacity-10 mb-6">😋</div>
+            <p className="text-lg text-nm-text/40 text-center max-w-[260px] leading-relaxed">
+              Scan a menu or ask me anything about food!
+            </p>
+          </div>
+        )}
+
+        {messages.map((message) => {
+          // For assistant messages, try to parse structured menu recommendations
+          const parsedResult = message.role === 'assistant'
+            ? parseMenuRecommendations(message.content)
+            : null;
+
+          return (
             <div
-              className={`max-w-[85%] px-5 py-3.5 ${
-                message.role === 'user'
-                  ? 'bg-nm-signature text-white rounded-[1.5rem] rounded-br-sm'
-                  : 'bg-nm-surface-lowest text-nm-text rounded-[1.5rem] rounded-bl-sm shadow-nm-float'
-              }`}
+              key={message.id}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {message.role === 'assistant' ? (
-                <div className="prose prose-sm max-w-none prose-headings:text-nm-text prose-headings:font-bold prose-headings:mb-2 prose-p:text-nm-text/80 prose-p:leading-relaxed prose-p:mb-3 prose-strong:text-nm-text prose-strong:font-bold prose-ul:text-nm-text/80 prose-ul:my-2 prose-ol:text-nm-text/80 prose-ol:my-2 prose-li:mb-1">
-                  <ReactMarkdown>{message.content}</ReactMarkdown>
+              {/* Structured result card rendering */}
+              {parsedResult ? (
+                <div className="w-full">
+                  <ChatResultCard
+                    result={parsedResult}
+                    onLogMeal={(dishName, calories, protein, carbs, fat) => {
+                      setMealName(dishName);
+                      setSelectedMealType(getMealTypeFromTime());
+                      setNutritionEstimate(
+                        calories != null
+                          ? {
+                              calories: calories,
+                              protein_g: protein ?? 0,
+                              carbs_g: carbs ?? 0,
+                              fat_g: fat ?? 0,
+                              fiber_g: 0,
+                              sugar_g: 0,
+                              sodium_mg: 0,
+                              confidence: 'medium' as const,
+                              notes: '',
+                            }
+                          : null
+                      );
+                      setShowLogModal(true);
+                    }}
+                  />
+                  <p className="text-xs text-nm-text/20 mt-2">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               ) : (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                /* Standard chat bubble */
+                <div
+                  className={`max-w-[85%] px-5 py-3.5 ${
+                    message.role === 'user'
+                      ? 'bg-nm-signature text-white rounded-[1.5rem] rounded-br-sm'
+                      : 'bg-nm-surface-lowest text-nm-text rounded-[1.5rem] rounded-bl-sm shadow-nm-float'
+                  }`}
+                >
+                  {message.role === 'assistant' ? (
+                    <div className="prose prose-sm max-w-none prose-headings:text-nm-text prose-headings:font-bold prose-headings:mb-2 prose-p:text-nm-text/80 prose-p:leading-relaxed prose-p:mb-3 prose-strong:text-nm-text prose-strong:font-bold prose-ul:text-nm-text/80 prose-ul:my-2 prose-ol:text-nm-text/80 prose-ol:my-2 prose-li:mb-1">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  )}
+                  <p className={`text-xs mt-2 ${
+                    message.role === 'user' ? 'text-white/60' : 'text-nm-text/30'
+                  }`}>
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
               )}
-              <p className={`text-xs mt-2 ${
-                message.role === 'user' ? 'text-white/60' : 'text-nm-text/30'
-              }`}>
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
+        {/* Typing indicator */}
         {isTyping && (
           <div className="flex justify-start">
             <div className="bg-nm-surface-lowest rounded-[1.5rem] rounded-bl-sm px-5 py-3.5 shadow-nm-float">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-nm-signature/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-nm-signature/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-nm-signature/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 bg-nm-signature rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2.5 h-2.5 bg-nm-signature/70 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2.5 h-2.5 bg-nm-signature/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </div>
