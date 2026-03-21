@@ -76,15 +76,14 @@ export function ProfileSetupModal({
 
     setUploadingImage(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${userId}/avatar.${ext}`;
+      // Fixed path — no extension, always overwrites the same file
+      const path = `${userId}/avatar`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(path, file, { upsert: true });
+        .upload(path, file, { upsert: true, contentType: file.type });
 
       if (uploadError) {
-        // Bucket likely doesn't exist yet
         setImageToast('Image upload coming soon!');
         setTimeout(() => setImageToast(null), 3000);
         return;
@@ -95,7 +94,9 @@ export function ProfileSetupModal({
         .getPublicUrl(path);
 
       if (urlData?.publicUrl) {
-        setSelectedAvatar(urlData.publicUrl);
+        // Cache bust — append timestamp so the browser fetches the new image
+        const freshUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+        setSelectedAvatar(freshUrl);
       }
     } catch {
       setImageToast('Image upload coming soon!');
