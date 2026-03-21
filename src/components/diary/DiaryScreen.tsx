@@ -123,6 +123,10 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
     feeling: string;
     notes: string | null;
     nutrition: NutritionEstimate | null;
+    quantity?: number;
+    unit?: string;
+    nutrition_source?: 'estimated' | 'manual' | 'combined';
+    per_unit_nutrition?: NutritionEstimate | null;
   }) => {
     const result = await addMeal({
       meal_name: data.meal_name,
@@ -130,6 +134,10 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
       feeling: data.feeling,
       notes: data.notes,
       nutrition: data.nutrition,
+      quantity: data.quantity,
+      unit: data.unit,
+      nutrition_source: data.nutrition_source,
+      per_unit_nutrition: data.per_unit_nutrition,
     });
 
     if (result.error) {

@@ -18,6 +18,10 @@ interface MealInsertData {
   feeling?: string | null;
   notes?: string | null;
   nutrition?: NutritionData | null;
+  quantity?: number;
+  unit?: string;
+  nutrition_source?: 'estimated' | 'manual' | 'combined';
+  per_unit_nutrition?: NutritionData | null;
 }
 
 function getDateRange(date: Date): { start: string; end: string } {
@@ -102,6 +106,17 @@ export function useMeals(userId: string) {
       mealLogData.fiber_g = data.nutrition.fiber_g;
       mealLogData.sugar_g = data.nutrition.sugar_g;
       mealLogData.sodium_mg = data.nutrition.sodium_mg;
+    }
+
+    // New quantity/unit/source fields (gracefully ignored if DB columns don't exist yet)
+    if (data.quantity !== undefined) mealLogData.quantity = data.quantity;
+    if (data.unit !== undefined) mealLogData.unit = data.unit;
+    if (data.nutrition_source !== undefined) mealLogData.nutrition_source = data.nutrition_source;
+    if (data.per_unit_nutrition) {
+      mealLogData.per_unit_calories = data.per_unit_nutrition.calories;
+      mealLogData.per_unit_protein_g = data.per_unit_nutrition.protein_g;
+      mealLogData.per_unit_carbs_g = data.per_unit_nutrition.carbs_g;
+      mealLogData.per_unit_fat_g = data.per_unit_nutrition.fat_g;
     }
 
     const { error } = await supabase.from('meal_logs').insert(mealLogData);

@@ -72,6 +72,13 @@ export interface MealLogEntry {
   sodium_mg: number | null;
   feeling: string | null;
   created_at: string;
+  quantity?: number | null;
+  unit?: string | null;
+  nutrition_source?: 'estimated' | 'manual' | 'combined' | null;
+  per_unit_calories?: number | null;
+  per_unit_protein_g?: number | null;
+  per_unit_carbs_g?: number | null;
+  per_unit_fat_g?: number | null;
 }
 
 export type Screen = 'onboarding' | 'swipe' | 'dashboard' | 'diary' | 'nutrition' | 'scanner' | 'recommendations' | 'history' | 'chat' | 'profile' | 'food-dna' | 'my-goals' | 'progress' | 'settings' | 'about' | 'friends';

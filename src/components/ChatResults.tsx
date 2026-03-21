@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ArrowLeft, Send, Loader2, ClipboardList, X, MapPin, AlertCircle, Wifi, WifiOff, Utensils, Users, UserPlus, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Send, Loader2, ClipboardList, X, MapPin, AlertCircle, Wifi, WifiOff, Utensils, Users, UserPlus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useGeolocation, type GeoLocation, type LocationStatus } from '../hooks/useGeolocation';
 import { useApp } from '../contexts/AppContext';
@@ -12,6 +12,7 @@ import { WEBHOOK_CHAT_URL } from '../config/api';
 import { fetchNutritionEstimate, type NutritionEstimate as CachedNutritionEstimate } from '../utils/nutritionCache';
 import { Toast, useErrorToast } from './ui/Toast';
 import { ChatResultCard, parseMenuRecommendations } from './ui/ChatResultCard';
+import { MealNutritionInput, type MealNutritionData } from './diary/MealNutritionInput';
 
 interface Message {
   id: string;
@@ -126,69 +127,7 @@ function LocationIndicator({ status, location }: { status: LocationStatus; locat
   );
 }
 
-// Nutrition Preview Card Component
-function NutritionPreview({ 
-  nutrition, 
-  isLoading, 
-  mealName 
-}: { 
-  nutrition: NutritionEstimate | null; 
-  isLoading: boolean;
-  mealName: string;
-}) {
-  if (!mealName.trim()) return null;
-
-  if (isLoading) {
-    return (
-      <div className="bg-gradient-to-r from-nm-bg to-nm-bg rounded-xl p-4 border border-nm-surface">
-        <div className="flex items-center gap-2 text-nm-text">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm font-medium">Estimating nutrition...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!nutrition) return null;
-
-  const confidenceColors = {
-    low: 'text-nm-accent bg-nm-accent/10',
-    medium: 'text-nm-signature bg-nm-signature/10',
-    high: 'text-nm-success bg-nm-success/10'
-  };
-
-  return (
-    <div className="bg-nm-surface rounded-[2rem] p-5">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-nm-label-md text-nm-text/40 uppercase tracking-wider">Estimated Nutrition</span>
-        <span className={`text-nm-label-md px-3 py-1 rounded-full font-bold ${confidenceColors[nutrition.confidence]}`}>
-          {nutrition.confidence}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-4 gap-3">
-        <div className="text-center">
-          <div className="text-2xl font-black text-nm-text">{nutrition.calories}</div>
-          <div className="text-nm-label-md text-nm-text/40 uppercase">Cal</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-black text-nm-signature">{nutrition.protein_g}g</div>
-          <div className="text-nm-label-md text-nm-text/40 uppercase">Protein</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-black text-nm-accent">{nutrition.carbs_g}g</div>
-          <div className="text-nm-label-md text-nm-text/40 uppercase">Carbs</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-black text-nm-text/80">{nutrition.fat_g}g</div>
-          <div className="text-nm-label-md text-nm-text/40 uppercase">Fat</div>
-        </div>
-      </div>
-
-      {nutrition.notes && (
-        <p className="text-nm-label-md text-nm-text/40 mt-3 italic">{nutrition.notes}</p>
-      )}
-    </div>
+// NutritionPreview removed — replaced by MealNutritionInput shared component
   );
 }
 
@@ -252,11 +191,10 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
   // Nutrition estimation state
   const [nutritionEstimate, setNutritionEstimate] = useState<NutritionEstimate | null>(null);
   const [isEstimatingNutrition, setIsEstimatingNutrition] = useState(false);
-  const nutritionDebounceRef = useRef<NodeJS.Timeout | null>(null);
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const sessionIdRef = useRef<string>(crypto.randomUUID());
+  const chatNutritionRef = useRef<MealNutritionData | null>(null);
 
   const loadFriendsList = useCallback(async () => {
     const friends = await loadAcceptedFriendsList();
@@ -419,21 +357,6 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
     return null;
   }, []);
 
-  // Nutrition estimation — uses centralized cache, no keystroke triggers
-  const estimateNutritionForModal = useCallback(async (meal: string) => {
-    if (!meal.trim() || meal.length < 3) {
-      setNutritionEstimate(null);
-      return;
-    }
-
-    setIsEstimatingNutrition(true);
-    const result = await fetchNutritionEstimate(meal.trim());
-    if (result) {
-      setNutritionEstimate(result as NutritionEstimate);
-    }
-    setIsEstimatingNutrition(false);
-  }, []);
-
   // Handle meal name changes — no auto-estimation, just update state
   const handleMealNameChange = (value: string) => {
     setMealName(value);
@@ -441,15 +364,6 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
       setNutritionEstimate(null);
     }
   };
-
-  // Cleanup debounce on unmount
-  useEffect(() => {
-    return () => {
-      if (nutritionDebounceRef.current) {
-        clearTimeout(nutritionDebounceRef.current);
-      }
-    };
-  }, []);
 
   const fetchTodayProgress = useCallback(async () => {
     const result = await hookFetchTodayProgress();
@@ -655,15 +569,14 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
     setIsSaving(true);
 
     try {
-      // Fetch estimate if we don't have one yet
-      let nutrition = nutritionEstimate;
-      if (!nutrition) {
+      const nd = chatNutritionRef.current;
+      let totalNutrition = nd?.total ?? null;
+
+      // If no nutrition at all, try one last fetch
+      if (!totalNutrition) {
         setIsEstimatingNutrition(true);
         const fetched = await fetchNutritionEstimate(mealName.trim());
-        if (fetched) {
-          nutrition = fetched as NutritionEstimate;
-          setNutritionEstimate(nutrition);
-        }
+        if (fetched) totalNutrition = fetched;
         setIsEstimatingNutrition(false);
       }
 
@@ -672,14 +585,26 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
         feeling: selectedFeeling,
         notes: notes.trim() || null,
         meal_type: selectedMealType || getMealTypeFromTime(),
-        nutrition: nutrition ? {
-          calories: nutrition.calories,
-          protein_g: nutrition.protein_g,
-          carbs_g: nutrition.carbs_g,
-          fat_g: nutrition.fat_g,
-          fiber_g: nutrition.fiber_g,
-          sugar_g: nutrition.sugar_g,
-          sodium_mg: nutrition.sodium_mg,
+        nutrition: totalNutrition ? {
+          calories: totalNutrition.calories,
+          protein_g: totalNutrition.protein_g,
+          carbs_g: totalNutrition.carbs_g,
+          fat_g: totalNutrition.fat_g,
+          fiber_g: totalNutrition.fiber_g,
+          sugar_g: totalNutrition.sugar_g,
+          sodium_mg: totalNutrition.sodium_mg,
+        } : null,
+        quantity: nd?.quantity ?? 1,
+        unit: nd?.unit ?? 'serving',
+        nutrition_source: nd?.nutritionSource ?? 'estimated',
+        per_unit_nutrition: nd?.perUnit ? {
+          calories: nd.perUnit.calories,
+          protein_g: nd.perUnit.protein_g,
+          carbs_g: nd.perUnit.carbs_g,
+          fat_g: nd.perUnit.fat_g,
+          fiber_g: nd.perUnit.fiber_g,
+          sugar_g: nd.perUnit.sugar_g,
+          sodium_mg: nd.perUnit.sodium_mg,
         } : null,
       });
 
@@ -716,6 +641,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
     setSelectedMealType(null);
     setNotes('');
     setNutritionEstimate(null);
+    chatNutritionRef.current = null;
   };
 
   const isLocating = ['requesting', 'acquiring_gps', 'falling_back'].includes(locationStatus);
@@ -990,53 +916,26 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
             </div>
 
             <div className="px-8 pb-8 space-y-5">
-              {/* Meal Name Input + Estimate button */}
+              {/* Meal Name Input */}
               <div>
                 <label htmlFor="meal-name" className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-2">
                   What did you eat?
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    id="meal-name"
-                    type="text"
-                    value={mealName}
-                    onChange={(e) => handleMealNameChange(e.target.value)}
-                    onBlur={() => {
-                      if (mealName.trim().length >= 3 && !nutritionEstimate) {
-                        estimateNutritionForModal(mealName);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (mealName.trim().length >= 3) estimateNutritionForModal(mealName);
-                      }
-                    }}
-                    placeholder="e.g., Spicy Thai Basil Chicken with Rice"
-                    className="flex-1 px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
-                  />
-                  <button
-                    onClick={() => estimateNutritionForModal(mealName)}
-                    disabled={!mealName.trim() || mealName.trim().length < 3 || isEstimatingNutrition}
-                    className="px-4 py-3.5 bg-gradient-to-br from-nm-signature to-nm-signature-light text-white font-bold text-sm rounded-full disabled:opacity-30 active:scale-95 transition-all flex items-center gap-1.5 flex-shrink-0"
-                  >
-                    {isEstimatingNutrition ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5" />
-                        Estimate
-                      </>
-                    )}
-                  </button>
-                </div>
+                <input
+                  id="meal-name"
+                  type="text"
+                  value={mealName}
+                  onChange={(e) => handleMealNameChange(e.target.value)}
+                  placeholder="e.g., Spicy Thai Basil Chicken with Rice"
+                  className="w-full px-5 py-3.5 bg-nm-surface-high rounded-full text-nm-text placeholder:text-nm-text/30 focus:outline-none focus:bg-nm-surface-lowest focus:ring-2 focus:ring-nm-signature/40 transition-all text-sm"
+                />
               </div>
 
-              {/* Nutrition Preview */}
-              <NutritionPreview 
-                nutrition={nutritionEstimate}
-                isLoading={isEstimatingNutrition}
+              {/* Quantity, unit, estimation, manual override */}
+              <MealNutritionInput
                 mealName={mealName}
+                initialNutrition={nutritionEstimate}
+                onChange={(data) => { chatNutritionRef.current = data; }}
               />
 
               {/* Meal Type Selector */}

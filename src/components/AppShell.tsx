@@ -56,6 +56,10 @@ export function AppShell() {
               feeling: data.feeling,
               notes: data.notes,
               nutrition: data.nutrition,
+              quantity: data.quantity,
+              unit: data.unit,
+              nutrition_source: data.nutrition_source,
+              per_unit_nutrition: data.per_unit_nutrition,
             });
             if (result.error) {
               showError(`Failed to save: ${result.error}`);
