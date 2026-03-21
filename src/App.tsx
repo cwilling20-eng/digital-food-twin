@@ -48,6 +48,7 @@ function App() {
                     <Route path="/scanner" element={<ScannerRoute />} />
                     <Route path="/recommendations" element={<RecommendationsRoute />} />
                     <Route path="/chat" element={<ChatRoute />} />
+                    <Route path="/social" element={<FriendsRoute />} />
                     <Route path="/diary" element={<DiaryRoute />} />
                     <Route path="/nutrition" element={<NutritionRoute />} />
                     <Route path="/history" element={<HistoryRoute />} />

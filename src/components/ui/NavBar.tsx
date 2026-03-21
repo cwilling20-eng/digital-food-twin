@@ -21,7 +21,7 @@ const NAV_ITEMS: { screen: Screen; icon: string; label: string }[] = [
   { screen: 'dashboard', icon: 'home', label: 'Home' },
   { screen: 'diary', icon: 'restaurant_menu', label: 'Meal Log' },
   // center FAB goes here
-  { screen: 'chat', icon: 'group', label: 'Social' },
+  { screen: 'social', icon: 'group', label: 'Social' },
   { screen: 'profile', icon: 'person', label: 'Profile' },
 ];
 
@@ -41,10 +41,10 @@ export function NavBar({ currentScreen, onNavigate, onQuickAdd, onScanMenu }: Na
   }, [showActions]);
 
   const isActive = (screen: Screen) => {
-    const profileSubScreens: string[] = ['food-dna', 'my-goals', 'progress', 'settings', 'about', 'history', 'friends'];
+    const profileSubScreens: string[] = ['food-dna', 'my-goals', 'progress', 'settings', 'about', 'history'];
     return (
       currentScreen === screen ||
-      (screen === 'chat' && currentScreen === 'recommendations') ||
+      (screen === 'social' && (currentScreen === 'friends' || currentScreen === 'chat' || currentScreen === 'recommendations')) ||
       (screen === 'dashboard' && currentScreen === 'scanner') ||
       (screen === 'profile' && profileSubScreens.includes(currentScreen))
     );
@@ -122,7 +122,7 @@ export function NavBar({ currentScreen, onNavigate, onQuickAdd, onScanMenu }: Na
           </div>
 
           {/* Social */}
-          <NavTab screen="chat" icon="group" label="Social" active={isActive('chat')} onClick={() => onNavigate('chat')} />
+          <NavTab screen="social" icon="group" label="Social" active={isActive('social')} onClick={() => onNavigate('social')} />
 
           {/* Profile */}
           <NavTab screen="profile" icon="person" label="Profile" active={isActive('profile')} onClick={() => onNavigate('profile')} />

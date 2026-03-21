@@ -81,7 +81,7 @@ export interface MealLogEntry {
   per_unit_fat_g?: number | null;
 }
 
-export type Screen = 'onboarding' | 'swipe' | 'dashboard' | 'diary' | 'nutrition' | 'scanner' | 'recommendations' | 'history' | 'chat' | 'profile' | 'food-dna' | 'my-goals' | 'progress' | 'settings' | 'about' | 'friends';
+export type Screen = 'onboarding' | 'swipe' | 'dashboard' | 'diary' | 'nutrition' | 'scanner' | 'recommendations' | 'history' | 'chat' | 'social' | 'profile' | 'food-dna' | 'my-goals' | 'progress' | 'settings' | 'about' | 'friends';
 
 export interface PublicProfile {
   id: string;
