@@ -161,7 +161,7 @@ function RestaurantFinderSheet({
           </div>
         </div>
 
-        <div className="px-6 py-5 space-y-6">
+        <div className="px-6 py-5 pb-40 space-y-6">
           <div>
             <h3 className="text-sm font-semibold text-nm-text mb-3">Who's Dining?</h3>
             <div className="flex gap-3">

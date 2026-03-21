@@ -11,7 +11,6 @@ import type { ComprehensiveUserProfile, DiningContext, FriendFoodDna } from '../
 import { WEBHOOK_CHAT_URL } from '../config/api';
 import { fetchNutritionEstimate, type NutritionEstimate as CachedNutritionEstimate } from '../utils/nutritionCache';
 import { Toast, useErrorToast } from './ui/Toast';
-import { ChatResultCard, parseMenuRecommendations } from './ui/ChatResultCard';
 import { MealNutritionInput, type MealNutritionData } from './diary/MealNutritionInput';
 
 interface Message {
@@ -185,6 +184,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showMealToast, setShowMealToast] = useState(false);
+  const [showShareToast, setShowShareToast] = useState(false);
   const { errorMessage, showError, clearError: clearToastError } = useErrorToast();
   const [locationToast, setLocationToast] = useState<{ message: string; type: 'info' | 'success' | 'warning' | 'error' } | null>(null);
   
@@ -775,50 +775,18 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
         )}
 
         {messages.map((message) => {
-          // For assistant messages, try to parse structured menu recommendations
-          const parsedResult = message.role === 'assistant'
-            ? parseMenuRecommendations(message.content)
-            : null;
+          // Show "Share to feed" on assistant messages that mention food/restaurants
+          const showShare = message.role === 'assistant' && message.id !== '1' &&
+            /restaurant|dish|menu|recommend|order|try|pick|calories|protein/i.test(message.content);
 
           return (
             <div
               key={message.id}
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {/* Structured result card rendering */}
-              {parsedResult ? (
-                <div className="w-full">
-                  <ChatResultCard
-                    result={parsedResult}
-                    onLogMeal={(dishName, calories, protein, carbs, fat) => {
-                      setMealName(dishName);
-                      setSelectedMealType(getMealTypeFromTime());
-                      setNutritionEstimate(
-                        calories != null
-                          ? {
-                              calories: calories,
-                              protein_g: protein ?? 0,
-                              carbs_g: carbs ?? 0,
-                              fat_g: fat ?? 0,
-                              fiber_g: 0,
-                              sugar_g: 0,
-                              sodium_mg: 0,
-                              confidence: 'medium' as const,
-                              notes: '',
-                            }
-                          : null
-                      );
-                      setShowLogModal(true);
-                    }}
-                  />
-                  <p className="text-xs text-nm-text/20 mt-2">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              ) : (
-                /* Standard chat bubble */
+              <div className="max-w-[85%]">
                 <div
-                  className={`max-w-[85%] px-5 py-3.5 ${
+                  className={`px-5 py-3.5 ${
                     message.role === 'user'
                       ? 'bg-nm-signature text-white rounded-[1.5rem] rounded-br-sm'
                       : 'bg-nm-surface-lowest text-nm-text rounded-[1.5rem] rounded-bl-sm shadow-nm-float'
@@ -837,7 +805,15 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-              )}
+                {showShare && (
+                  <button
+                    onClick={() => { setShowShareToast(true); setTimeout(() => setShowShareToast(false), 2500); }}
+                    className="mt-1.5 ml-1 text-nm-signature text-sm font-bold hover:opacity-80 transition-opacity"
+                  >
+                    Share to feed
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
@@ -1034,6 +1010,13 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
       {showMealToast && (
         <div className="fixed bottom-48 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
           <span className="text-sm font-bold">Meal logged! I'll remember this for your recommendations.</span>
+        </div>
+      )}
+
+      {/* Share to Feed Toast */}
+      {showShareToast && (
+        <div className="fixed bottom-48 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
+          <span className="text-sm font-bold">Sharing to feed coming soon!</span>
         </div>
       )}
     </div>
