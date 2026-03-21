@@ -26,12 +26,16 @@ export function AppHeader({ avatarUrl, onNotificationClick, onAvatarClick }: App
     <>
       <header className="bg-[#FFFAF5]/80 backdrop-blur-[24px] sticky top-0 z-40 flex justify-between items-center w-full px-6 py-4">
         <div className="flex items-center gap-3">
-          <button onClick={onAvatarClick} className="w-10 h-10 rounded-full bg-nm-signature-light overflow-hidden">
+          <button
+            onClick={onAvatarClick}
+            className="w-10 h-10 rounded-full overflow-hidden active:scale-90 transition-transform"
+            aria-label="Go to profile"
+          >
             {avatarUrl ? (
               <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-nm-surface-high flex items-center justify-center">
-                <span className="material-symbols-outlined text-nm-text/40">person</span>
+              <div className="w-full h-full bg-gradient-to-br from-nm-signature to-nm-signature-light flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-lg">person</span>
               </div>
             )}
           </button>

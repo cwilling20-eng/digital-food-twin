@@ -452,12 +452,10 @@ function CalculatedSection({ calculated }: { calculated: ReturnType<typeof calcu
 
 function RecommendationBadge({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
-    <div className="bg-nm-surface rounded-[1.5rem] px-4 py-4 flex items-baseline justify-between">
-      <span className="text-nm-label-md text-nm-text/60 uppercase tracking-wider">{label}</span>
-      <div className="flex items-baseline gap-0.5">
-        <span className="text-3xl font-bold text-nm-signature">{value}</span>
-        <span className="text-nm-label-md text-nm-text/40">{unit}</span>
-      </div>
+    <div className="bg-nm-surface rounded-[1.5rem] px-4 py-4 text-center min-w-0">
+      <span className="block text-nm-label-md text-nm-text/60 uppercase tracking-wider mb-1">{label}</span>
+      <span className="block text-3xl font-bold text-nm-signature">{value}</span>
+      <span className="block text-nm-label-md text-nm-text/40">{unit}</span>
     </div>
   );
 }

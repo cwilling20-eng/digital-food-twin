@@ -4,10 +4,10 @@ import type { BodyMetrics } from '../utils/nutritionCalc';
 import { DEFAULT_BODY_METRICS } from '../utils/nutritionCalc';
 
 const DEFAULT_GOALS: NutritionGoals = {
-  calorieGoal: 2000,
-  proteinGoal: 150,
-  carbsGoal: 200,
-  fatGoal: 65,
+  calorieGoal: 0,
+  proteinGoal: 0,
+  carbsGoal: 0,
+  fatGoal: 0,
   waterGoal: 8,
 };
 
