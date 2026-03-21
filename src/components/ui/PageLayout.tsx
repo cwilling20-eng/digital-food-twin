@@ -8,7 +8,7 @@ interface PageLayoutProps {
 
 export function PageLayout({ children, className = '', noPadding = false }: PageLayoutProps) {
   return (
-    <div className={`min-h-screen bg-nm-bg ${noPadding ? '' : 'px-6'} pt-0 pb-32 ${className}`}>
+    <div className={`min-h-screen bg-nm-bg ${noPadding ? '' : 'px-6'} pt-0 pb-40 ${className}`}>
       {children}
     </div>
   );

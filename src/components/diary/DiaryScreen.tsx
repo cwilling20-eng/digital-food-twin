@@ -179,7 +179,7 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
   const isToday = isSameDay(selectedDate, new Date());
 
   return (
-    <div className="min-h-screen bg-nm-bg pb-24">
+    <div className="min-h-screen bg-nm-bg pb-40">
       {/* Date Header */}
       <div className="sticky top-0 z-20 bg-nm-bg/80 backdrop-blur-xl">
         <div className="px-6 pt-12 pb-4">
@@ -387,19 +387,19 @@ export function DiaryScreen({ userId, onOpenQuickAdd, onOpenNutrition }: DiarySc
       )}
 
       {saveToast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
           <span className="text-sm font-bold">Food logged!</span>
         </div>
       )}
 
       {deleteToast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
           <span className="text-sm font-bold">Meal removed</span>
         </div>
       )}
 
       {updateToast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
+        <div className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
           <span className="text-sm font-bold">Meal updated</span>
         </div>
       )}

@@ -97,7 +97,7 @@ export function MoreMenu({ userEmail, onNavigate, onLogout }: MoreMenuProps) {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-40">
       <div className="bg-white px-6 pt-12 pb-6 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-gradient-to-br from-nm-signature to-nm-signature rounded-full flex items-center justify-center shadow-md shadow-nm-bg0/20">

@@ -30,7 +30,7 @@ export function DislikesSection({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-40">
       <div className="bg-white sticky top-0 z-20 shadow-sm">
         <div className="px-4 pt-12 pb-4">
           <div className="flex items-center gap-3">

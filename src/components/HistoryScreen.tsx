@@ -52,7 +52,7 @@ export function HistoryScreen({ userId }: HistoryScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-40">
       <div className="bg-white px-6 pt-12 pb-6 shadow-sm mb-4">
         <div className="flex justify-between items-center">
           <div>

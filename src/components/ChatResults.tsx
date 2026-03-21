@@ -853,7 +853,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 pb-44 space-y-4">
+      <div className="flex-1 overflow-y-auto px-4 py-6 pb-52 space-y-4">
         {/* Empty state — shown when only the default greeting exists */}
         {messages.length <= 1 && !isTyping && (
           <div className="flex flex-col items-center justify-center py-12 select-none">
@@ -949,7 +949,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
       </div>
 
       {/* Input Area */}
-      <div className="fixed bottom-20 left-0 right-0 bg-nm-bg/80 backdrop-blur-xl px-4 py-3 z-40 safe-area-inset max-w-md mx-auto">
+      <div className="fixed bottom-28 left-0 right-0 bg-nm-bg/80 backdrop-blur-xl px-4 py-3 z-40 safe-area-inset max-w-md mx-auto">
         {isLocating && (
           <div className="flex items-center justify-center gap-2 mb-2 px-4 py-2 bg-nm-surface rounded-full animate-fade-in">
             <MapPin className="w-4 h-4 flex-shrink-0 animate-pulse text-nm-signature" />
@@ -1122,7 +1122,7 @@ export function ChatResults({ initialAnalysis, userProfile, userId, onBack, dini
 
       {/* Meal Saved Toast */}
       {showMealToast && (
-        <div className="fixed bottom-40 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
+        <div className="fixed bottom-48 left-1/2 -translate-x-1/2 bg-nm-text text-white px-6 py-3 rounded-full shadow-nm-float z-50 flex items-center gap-2 animate-fade-in">
           <span className="text-sm font-bold">Meal logged! I'll remember this for your recommendations.</span>
         </div>
       )}

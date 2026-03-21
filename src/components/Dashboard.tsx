@@ -456,7 +456,7 @@ export function Dashboard({ userId, userEmail, onNavigate, onScan: _onScan, onFi
    * We get pt from sticky AppHeader, so just use space-y-10.
    */
   return (
-    <div className="px-6 max-w-2xl mx-auto space-y-10 pb-8">
+    <div className="px-6 max-w-2xl mx-auto space-y-10 pb-40">
 
       {/* ── Hero Greeting ── Stitch line 114-118: section > h1.text-[2.5rem].leading-tight.font-extrabold.tracking-tight */}
       <section>

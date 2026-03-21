@@ -214,7 +214,7 @@ export function FoodDnaHub({ onBack }: FoodDnaHubProps) {
   const dislikeItems = foodDislikes.dislikedFoods.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-nm-bg pb-24">
+    <div className="min-h-screen bg-nm-bg pb-40">
       <div className="bg-gradient-to-br from-nm-signature to-nm-signature-light px-6 pt-12 pb-8">
         <div className="flex items-center gap-3 mb-6">
           <button

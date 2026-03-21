@@ -64,7 +64,7 @@ export function MealFavoritesSection({
   const currentTab = MEAL_TABS.find(t => t.id === activeTab);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-40">
       <div className="bg-white sticky top-0 z-20 shadow-sm">
         <div className="px-4 pt-12 pb-3">
           <div className="flex items-center gap-3">

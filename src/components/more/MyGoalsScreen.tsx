@@ -99,7 +99,7 @@ export function MyGoalsScreen({ onSave, onBack }: MyGoalsScreenProps) {
   const activityLabel = ACTIVITY_OPTIONS.find(o => o.value === metrics.activityLevel)?.label || 'Select...';
 
   return (
-    <div className="min-h-screen bg-nm-bg pb-32">
+    <div className="min-h-screen bg-nm-bg pb-40">
       <div className="bg-nm-bg/80 backdrop-blur-xl sticky top-0 z-30">
         <div className="px-6 pt-12 pb-4">
           <div className="flex items-center gap-3">

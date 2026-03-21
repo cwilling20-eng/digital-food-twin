@@ -38,7 +38,7 @@ function CuisineForm({ config, data, onSave, onBack, saving }: CuisineFormProps)
   };
 
   return (
-    <div className="min-h-screen bg-nm-bg pb-24">
+    <div className="min-h-screen bg-nm-bg pb-40">
       <div className="bg-nm-bg/80 backdrop-blur-xl sticky top-0 z-20">
         <div className="px-6 pt-12 pb-4">
           <div className="flex items-center gap-3">
@@ -181,7 +181,7 @@ export function CuisineExpertiseSection({
   }
 
   return (
-    <div className="min-h-screen bg-nm-bg pb-24">
+    <div className="min-h-screen bg-nm-bg pb-40">
       <div className="bg-nm-bg/80 backdrop-blur-xl sticky top-0 z-20">
         <div className="px-6 pt-12 pb-4">
           <div className="flex items-center gap-3">

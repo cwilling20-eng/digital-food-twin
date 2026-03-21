@@ -175,7 +175,7 @@ export function MenuScanner({ onScanComplete, comprehensiveProfile, scanMode, se
   };
 
   return (
-    <div className="min-h-screen bg-nm-bg pb-20">
+    <div className="min-h-screen bg-nm-bg pb-40">
       <div className="px-6 pt-8 pb-6">
         <h1 className="text-2xl font-bold text-nm-text mb-2">Menu Scanner</h1>
         <p className="text-nm-text/60">Scan or upload a menu for personalized recommendations</p>

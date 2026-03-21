@@ -111,7 +111,7 @@ export function FriendsScreen({ userId, onNavigate, onPlanDinner }: FriendsScree
   };
 
   return (
-    <div className="min-h-screen bg-nm-bg pb-24">
+    <div className="min-h-screen bg-nm-bg pb-40">
       {/* Header */}
       <div className="bg-nm-bg/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="px-6 pt-12 pb-4">
