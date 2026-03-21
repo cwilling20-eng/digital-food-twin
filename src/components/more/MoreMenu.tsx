@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ClipboardList, Dna, Target, TrendingUp, MessageCircle, Settings, Info, ChevronRight, LogOut, User, Camera } from 'lucide-react';
 import type { Screen } from '../../types';
 import { ProfileSetupModal } from '../friends/ProfileSetupModal';
@@ -98,8 +98,13 @@ export function MoreMenu({ userId, userEmail, onNavigate, onLogout }: MoreMenuPr
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const { publicProfile, loadProfile } = usePublicProfile(userId);
 
-  const initials = (publicProfile?.displayName || userEmail.split('@')[0])
-    .split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  // Fetch profile on mount
+  useEffect(() => { loadProfile(); }, [loadProfile]);
+
+  const displayName = publicProfile?.displayName || userEmail.split('@')[0];
+  const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const avatarUrl = publicProfile?.avatarUrl;
+  const isImageAvatar = avatarUrl && avatarUrl.startsWith('http');
 
   return (
     <div className="min-h-screen bg-nm-bg pb-40">
@@ -107,16 +112,24 @@ export function MoreMenu({ userId, userEmail, onNavigate, onLogout }: MoreMenuPr
         <div className="flex items-center gap-4">
           <button
             onClick={() => setShowProfileSetup(true)}
-            className="relative w-14 h-14 bg-gradient-to-br from-nm-signature to-nm-signature-light rounded-full flex items-center justify-center shadow-nm-float active:scale-95 transition-transform"
+            className="relative w-14 h-14 rounded-full shadow-nm-float active:scale-95 transition-transform overflow-hidden"
           >
-            <span className="text-lg font-bold text-white">{initials}</span>
+            {isImageAvatar ? (
+              <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-nm-signature to-nm-signature-light rounded-full flex items-center justify-center">
+                <span className="text-lg font-bold text-white">{initials}</span>
+              </div>
+            )}
             <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-nm-surface-lowest rounded-full flex items-center justify-center shadow-sm">
               <Camera className="w-3 h-3 text-nm-text/60" />
             </div>
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-nm-text truncate">{userEmail.split('@')[0]}</h1>
-            <p className="text-sm text-nm-text/60 truncate">{userEmail}</p>
+            <h1 className="text-xl font-bold text-nm-text truncate">{displayName}</h1>
+            <p className="text-sm text-nm-text/60 truncate">
+              {publicProfile?.username ? `@${publicProfile.username}` : userEmail}
+            </p>
           </div>
           <button
             onClick={() => onNavigate('food-dna')}

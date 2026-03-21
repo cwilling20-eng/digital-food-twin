@@ -5,6 +5,7 @@ import { QuickAddModal } from './diary/QuickAddModal';
 import { ErrorToast } from './ui/Toast';
 import { useUI } from '../contexts/UIContext';
 import { useProfile } from '../contexts/ProfileContext';
+import { usePublicProfile } from '../hooks/usePublicProfile';
 import { useMeals } from '../hooks/useMeals';
 import type { Screen } from '../types';
 
@@ -17,14 +18,19 @@ export function AppShell() {
   const { showQuickAdd, setShowQuickAdd, quickAddPrefill, clearQuickAddPrefill, errorMessage, showError, clearError } = useUI();
   const { userId } = useProfile();
   const { addMeal } = useMeals(userId);
+  const { publicProfile } = usePublicProfile(userId);
 
   const showNav = !HIDE_NAV_PATHS.includes(location.pathname);
   const showHeader = !HIDE_HEADER_PATHS.includes(location.pathname);
+
+  // Derive avatar URL — show uploaded image if it's a URL, otherwise undefined
+  const avatarUrl = publicProfile?.avatarUrl?.startsWith('http') ? publicProfile.avatarUrl : undefined;
 
   return (
     <div className="max-w-md mx-auto bg-nm-bg min-h-screen">
       {showHeader && (
         <AppHeader
+          avatarUrl={avatarUrl}
           onAvatarClick={() => navigate('/profile')}
         />
       )}

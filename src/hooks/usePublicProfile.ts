@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { PublicProfile } from '../types';
 
@@ -7,7 +7,7 @@ export function usePublicProfile(userId: string) {
   const [loading, setLoading] = useState(true);
 
   const loadProfile = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) { setLoading(false); return; }
     setLoading(true);
 
     const { data } = await supabase
@@ -28,6 +28,9 @@ export function usePublicProfile(userId: string) {
 
     setLoading(false);
   }, [userId]);
+
+  // Auto-load on mount / userId change
+  useEffect(() => { loadProfile(); }, [loadProfile]);
 
   const upsertProfile = useCallback(async (profile: {
     username: string;

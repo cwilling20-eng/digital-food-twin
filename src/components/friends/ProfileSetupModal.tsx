@@ -108,19 +108,21 @@ export function ProfileSetupModal({
   };
 
   const handleSave = async () => {
-    if (!displayName) return;
-
-    // Username is optional — only validate if provided
-    if (username) {
+    // Validate username only if the user typed a new one
+    if (username && username !== (currentProfile?.username || '')) {
       const isAvailable = await checkUsernameAvailable(username);
       if (!isAvailable) return;
     }
 
     setSaving(true);
 
+    // Use existing values as fallbacks so we never wipe data
+    const finalDisplayName = displayName || currentProfile?.displayName || '';
+    const finalUsername = username || currentProfile?.username || finalDisplayName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || 'user';
+
     const result = await upsertProfile({
-      username: username || displayName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
-      displayName,
+      username: finalUsername,
+      displayName: finalDisplayName,
       avatarUrl: selectedAvatar,
       shareFoodDna,
     });
@@ -311,9 +313,9 @@ export function ProfileSetupModal({
 
           <button
             onClick={handleSave}
-            disabled={!displayName || !!usernameError || saving}
+            disabled={!!usernameError || saving}
             className={`w-full py-4 font-bold rounded-full transition-all flex items-center justify-center gap-2 active:scale-95 ${
-              !displayName || !!usernameError || saving
+              !!usernameError || saving
                 ? 'bg-nm-surface-high text-nm-text/30 cursor-not-allowed'
                 : 'bg-gradient-to-br from-nm-signature to-nm-signature-light text-white shadow-nm-float'
             }`}
