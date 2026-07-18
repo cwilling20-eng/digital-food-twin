@@ -3,7 +3,19 @@
   "nodes": [
     {
       "parameters": {
-        "inputSource": "passthrough"
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "user_id",
+              "type": "string"
+            },
+            {
+              "name": "friend_names",
+              "type": "string"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -16,91 +28,57 @@
     },
     {
       "parameters": {
-        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_friends",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "or",
-              "value": "=(user_id.eq.{{ $json.user_id }},friend_id.eq.{{ $json.user_id }})"
-            },
-            {
-              "name": "status",
-              "value": "eq.accepted"
-            },
-            {
-              "name": "select",
-              "value": "user_id,friend_id"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
-            },
-            {
-              "name": "authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
-            }
-          ]
-        },
-        "options": {}
+        "operation": "getAll",
+        "tableId": "user_friends",
+        "returnAll": true,
+        "filterType": "string",
+        "filterString": "=or=(user_id.eq.{{ $('When Executed by Another Workflow').first().json.user_id }},friend_id.eq.{{ $('When Executed by Another Workflow').first().json.user_id }})&status=eq.accepted"
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
         16,
         0
       ],
-      "id": "59fd6dbf-07ee-454d-9cee-6a961e72f4c8",
-      "name": "Get User's Friends"
+      "id": "e4b7d9a1-3c25-4f68-b0d2-a91c5e7f3b84",
+      "name": "Get User's Friends",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "sf62mjIrqsqjFw86",
+          "name": "Supabase account"
+        }
+      }
     },
     {
       "parameters": {
-        "url": "https://vvfefrmedmbqljqwgsuy.supabase.co/rest/v1/user_public_profiles",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "id",
-              "value": "=in.({{ $json.friend_ids_string }})"
-            },
-            {
-              "name": "select",
-              "value": "id,username,display_name,avatar_url"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
-            },
-            {
-              "name": "authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2ZmVmcm1lZG1icWxqcXdnc3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDExNzYsImV4cCI6MjA4NTIxNzE3Nn0.iG9B4Qw90XqF1rhlBFw7Hq2_8YgHkCMfl2Fw4y0sBp0"
-            }
-          ]
-        },
-        "options": {}
+        "operation": "getAll",
+        "tableId": "user_public_profiles",
+        "returnAll": true,
+        "filterType": "string",
+        "filterString": "=id=in.({{ $('Extract Friend IDs').first().json.friend_ids_string }})"
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
         416,
         0
       ],
-      "id": "b9ab92e7-92c9-4532-8ccd-0a418bb0a6da",
-      "name": "Get Friend Profiles"
+      "id": "9c2f5e83-7a41-4d96-8b3c-f60d2a84e175",
+      "name": "Get Friend Profiles",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "sf62mjIrqsqjFw86",
+          "name": "Supabase account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const currentUserId = $('When Executed by Another Workflow').first().json.user_id;\nconst friendships = $input.all().map(item => item.json);\n\n// If friendships is an array inside first item\nconst relationships = Array.isArray(friendships[0]) ? friendships[0] : friendships;\n\n// Extract the OTHER person's ID from each friendship\nconst friendIds = relationships.map(rel => {\n  if (rel.user_id === currentUserId) {\n    return rel.friend_id;\n  } else {\n    return rel.user_id;\n  }\n}).filter(id => id); // Remove any nulls\n\nreturn [{\n  json: {\n    friend_ids: friendIds,\n    friend_ids_string: friendIds.join(',')\n  }\n}];"
+        "jsCode": "const currentUserId = $('When Executed by Another Workflow').first().json.user_id;\n\n// Supabase node outputs one item per row; alwaysOutputData can emit a single\n// empty item when there are no rows, so filter those out.\nconst relationships = $input.all()\n  .map(i => i.json)\n  .filter(j => j && Object.keys(j).length > 0);\n\nconst friendIds = relationships.map(rel =>\n  rel.user_id === currentUserId ? rel.friend_id : rel.user_id\n).filter(Boolean);\n\nreturn [{\n  json: {\n    friend_ids: friendIds,\n    // Zero-UUID sentinel keeps id=in.(...) valid when there are no friends\n    friend_ids_string: friendIds.length ? friendIds.join(',') : '00000000-0000-0000-0000-000000000000'\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -113,7 +91,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const requestedNames = $('When Executed by Another Workflow').first().json.friend_names;\nconst friendProfiles = $('HTTP Request - Get Friend Profiles').first().json || [];\n\nconst matches = [];\nconst notFound = [];\n\nfor (const name of requestedNames) {\n  const nameLower = name.toLowerCase();\n  \n  const match = friendProfiles.find(f => \n    (f.display_name && f.display_name.toLowerCase().includes(nameLower)) ||\n    (f.username && f.username.toLowerCase().includes(nameLower))\n  );\n  \n  if (match) {\n    matches.push({\n      requested_name: name,\n      user_id: match.id,\n      display_name: match.display_name,\n      username: match.username\n    });\n  } else {\n    notFound.push(name);\n  }\n}\n\nreturn [{\n  json: {\n    matched_friends: matches,\n    not_found: notFound,\n    matched_user_ids: matches.map(m => m.user_id)\n  }\n}];"
+        "jsCode": "// friend_names arrives as a string (JSON array or CSV) from the $fromAI input\nlet requestedNames = $('When Executed by Another Workflow').first().json.friend_names;\nif (typeof requestedNames === 'string') {\n  try { requestedNames = JSON.parse(requestedNames); }\n  catch (e) { requestedNames = requestedNames.split(',').map(s => s.trim()).filter(Boolean); }\n}\nif (!Array.isArray(requestedNames)) requestedNames = [];\n\nconst friendProfiles = $('Get Friend Profiles').all()\n  .map(i => i.json)\n  .filter(j => j && Object.keys(j).length > 0);\n\nconst matches = [];\nconst notFound = [];\n\nfor (const name of requestedNames) {\n  const nameLower = String(name).toLowerCase();\n  const match = friendProfiles.find(f =>\n    (f.display_name && f.display_name.toLowerCase().includes(nameLower)) ||\n    (f.username && f.username.toLowerCase().includes(nameLower))\n  );\n  if (match) {\n    matches.push({ requested_name: name, user_id: match.id, display_name: match.display_name, username: match.username });\n  } else {\n    notFound.push(name);\n  }\n}\n\nreturn [{ json: { matched_friends: matches, not_found: notFound, matched_user_ids: matches.map(m => m.user_id) } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,

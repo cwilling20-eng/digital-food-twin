@@ -22,4 +22,5 @@ dist-ssr
 *.sw?
 .env
 Digital Food Twin.env
-n8n-workflows/
+# superseded export that still contains pasted anon keys - do not commit
+n8n-workflows/Tool - Get Group Food DNA.json
